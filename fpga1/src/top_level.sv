@@ -40,7 +40,6 @@ module top_level(input wire clk_100mhz,
                     .sd_reset(sd_reset), 
                     .sd_sck(sd_sck), 
                     .sd_cmd(sd_cmd));
-
     
     // Generate 25 Mhz clk
     always_ff @(posedge clk_100mhz) begin
