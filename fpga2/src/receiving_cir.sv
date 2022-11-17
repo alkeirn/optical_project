@@ -4,7 +4,7 @@
 module receiving_cir(input wire clk,
                    input wire rst,
                    input wire i_block,
-                   input wire valid_in;
+                   input wire valid_in,
 
                    output logic valid_out,
                    output logic [27:0] o_block

@@ -156,7 +156,7 @@ def copyfiles(p, ftt):
 		with open(f, 'rb') as fd:
 			spsend(p, f"write {f} {fsize}")
 			time.sleep(0.1) #?
-			spqsend(p, fd.read())
+			spqsend(p, fd.read())   
 			xsprecv(p)
 
 			spsend(p, f"type {f} {t}")
