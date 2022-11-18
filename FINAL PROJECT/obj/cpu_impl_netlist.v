@@ -1,8 +1,8 @@
 // Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
-// Tool Version: Vivado v.2022.1 (win64) Build 3526262 Mon Apr 18 15:48:16 MDT 2022
-// Date        : Sun Nov 13 15:11:50 2022
-// Host        : LAPTOP-BE41R870 running 64-bit major release  (build 9200)
+// Tool Version: Vivado v.2022.1 (lin64) Build 3526262 Mon Apr 18 15:47:01 MDT 2022
+// Date        : Tue Nov 15 15:11:19 2022
+// Host        : alyssa-virtual-machine running 64-bit Ubuntu 20.04.5 LTS
 // Command     : write_verilog -force obj/cpu_impl_netlist.v -mode timesim -sdf_anno true
 // Design      : top_level
 // Purpose     : This verilog netlist is a timing simulation representation of the design and should not be modified or
@@ -12,21 +12,23 @@
 `timescale 1 ps / 1 ps
 `define XIL_TIMING
 
-(* ECO_CHECKSUM = "1b7481d7" *) 
+(* ECO_CHECKSUM = "11955954" *) 
 (* NotValidForBitStream *)
 module top_level
-   (clk,
+   (clk_100mhz,
     btnc,
     jc,
     ja,
     led);
-  input clk;
+  input clk_100mhz;
   input btnc;
   input [7:0]jc;
   output [7:0]ja;
   output [15:0]led;
 
+  wire clk_100mhz;
   wire [7:0]ja;
+  wire [0:0]ja_OBUF;
   wire [7:0]jc;
   wire [15:0]led;
   wire [2:2]led_OBUF;
@@ -34,8 +36,11 @@ module top_level
 initial begin
  $sdf_annotate("cpu_impl_netlist.sdf",,,,"tool_control");
 end
+  IBUF clk_100mhz_IBUF_inst
+       (.I(clk_100mhz),
+        .O(ja_OBUF));
   OBUF \ja_OBUF[0]_inst 
-       (.I(1'b1),
+       (.I(ja_OBUF),
         .O(ja[0]));
   OBUFT \ja_OBUF[1]_inst 
        (.I(1'b0),

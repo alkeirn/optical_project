@@ -1,13 +1,13 @@
 #-----------------------------------------------------------
 # Vivado v2022.1 (64-bit)
-# SW Build 3526262 on Mon Apr 18 15:48:16 MDT 2022
+# SW Build 3526262 on Mon Apr 18 15:47:01 MDT 2022
 # IP Build 3524634 on Mon Apr 18 20:55:01 MDT 2022
-# Start of session at: Sun Nov 13 15:10:29 2022
-# Process ID: 7404
-# Current directory: C:/Users/ericb/Documents/6.111/FINAL PROJECT
-# Command line: vivado.exe -mode batch -source build.tcl
-# Log file: C:/Users/ericb/Documents/6.111/FINAL PROJECT/vivado.log
-# Journal file: C:/Users/ericb/Documents/6.111/FINAL PROJECT\vivado.jou
-# Running On: LAPTOP-BE41R870, OS: Windows, CPU Frequency: 3302 MHz, CPU Physical cores: 4, Host memory: 16952 MB
+# Start of session at: Tue Nov 15 15:10:10 2022
+# Process ID: 212858
+# Current directory: /home/alyssa/6-2050/optical_project/FINAL PROJECT
+# Command line: vivado -mode batch -source build.tcl
+# Log file: /home/alyssa/6-2050/optical_project/FINAL PROJECT/vivado.log
+# Journal file: /home/alyssa/6-2050/optical_project/FINAL PROJECT/vivado.jou
+# Running On: alyssa-virtual-machine, OS: Linux, CPU Frequency: 2304.000 MHz, CPU Physical cores: 2, Host memory: 8101 MB
 #-----------------------------------------------------------
 source build.tcl
