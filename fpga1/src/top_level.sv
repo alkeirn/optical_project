@@ -1,4 +1,3 @@
-`timescale 1ns / 1ps
 `default_nettype none
 
 module top_level(input wire clk_100mhz, 
@@ -12,46 +11,44 @@ module top_level(input wire clk_100mhz,
                     output logic sd_reset, 
                     output logic sd_sck, 
                     output logic sd_cmd,
-                    output logic aud_sd,
-                    output logic aud_pwm
+                    output logic ca, cb, cc, cd, ce, cf, cg,
+                    output logic [7:0] an
+
     );
     
     //top level logic
+    logic [7:0] data_out;
+    logic [1:0] state;
+    logic [9:0] byte_count;
+    logic seen_playing;
     logic rst;            // assign to your system reset
-    assign rst = btnr;    // if yours isn't btnr
-    
-    //setup sd stuff
-    assign sd_dat[2:1] = 2'b11;
-    assign sd_reset = 0;
+    logic clk_25mhz;
+    logic clk_buff_100mhz;
+
+    assign rst = btnr; 
+    assign led = byte_count;   
 
     // generate 25 mhz clock for sd_controller 
-    logic clk_25mhz;
-    logic [1:0] count = 0;
-    //clk_wiz_lab3 clock_gen(.clk_in1(clk_100mhz), .clk_out1(clk_25mhz));
-   
-    song_selection ss(.clk_100mhz(clk_100mhz), 
+    clk_100mhz_25mhz clock_gen(.clk_in1(clk_100mhz), .clk_out1(clk_25mhz),.clk_out2(clk_buff_100mhz));
+
+    song_selection ss(.clk_25mhz(clk_25mhz),
                     .sd_cd(sd_cd),
                     .rst(rst), 
-                    .clk_25mhz(clk_25mhz),
-                    .play_button(btnc),
+                    .play_button(btnc), //used to read from sd card
                     .sd_dat(sd_dat),
-                       
-                    .led(led),
+
+                    .data_out(data_out), //one byte audio data
                     .sd_reset(sd_reset), 
                     .sd_sck(sd_sck), 
-                    .sd_cmd(sd_cmd));
+                    .sd_cmd(sd_cmd)
+                    );
 
+    seven_segment_controller sev(.clk_in(clk_buff_100mhz),
+                                .rst_in(rst),
+                                .val_in(data_out),
+                                .cat_out({cg, cf, ce, cd, cc, cb, ca}),
+                                .an_out(an));
     
-    // Generate 25 Mhz clk
-    always_ff @(posedge clk_100mhz) begin
-        if (rst) begin
-            clk_25mhz <= 0;
-            count <= 0;
-        end else if (count == 3) clk_25mhz <= !clk_25mhz;
-        else count <= count + 1;
-    end
-  
-    
+
 endmodule
 
-`default_nettype wire
