@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 `default_nettype none
 
-module receiving_cir(input wire clk,
+module receiving(input wire clk,
                    input wire rst,
                    input wire i_block,
                    input wire valid_in,
