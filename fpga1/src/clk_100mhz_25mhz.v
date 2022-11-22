@@ -1,4 +1,4 @@
-// file: clk_wiz_lab3.v
+// file: ak_clock.v
 //
 // (c) Copyright 2008 - 2013 Xilinx, Inc. All rights reserved.
 //
@@ -55,7 +55,8 @@
 //  Output     Output      Phase    Duty Cycle   Pk-to-Pk     Phase
 //   Clock     Freq (MHz)  (degrees)    (%)     Jitter (ps)  Error (ps)
 //----------------------------------------------------------------------------
-// CLK_OUT1____65.000______0.000______50.0______254.866____297.890
+// clk_out1__25.00000______0.000______50.0______175.402_____98.575
+// clk_out2__100.00000______0.000______50.0______130.958_____98.575
 //
 //----------------------------------------------------------------------------
 // Input Clock   Freq (MHz)    Input Jitter (UI)
@@ -64,18 +65,22 @@
 
 `timescale 1ps/1ps
 
-module clk_wiz_lab3
- (// Clock in ports
-  input         clk_in1,
-  // Clock out ports
-  output        clk_out1
- );
+module clk_100mhz_25mhz
 
+ (// Clock in ports
+  // Clock out ports
+  output        clk_out1,
+  output        clk_out2,
+  input         clk_in1
+ );
   // Input buffering
   //------------------------------------
+wire clk_in1_ak_clock;
+wire clk_in2_ak_clock;
   IBUF clkin1_ibufg
-   (.O (clk_in1_clk_wiz_0),
+   (.O (clk_in1_ak_clock),
     .I (clk_in1));
+
 
 
 
@@ -85,15 +90,23 @@ module clk_wiz_lab3
   // Instantiation of the MMCM PRIMITIVE
   //    * Unused inputs are tied off
   //    * Unused outputs are labeled unused
+
+  wire        clk_out1_ak_clock;
+  wire        clk_out2_ak_clock;
+  wire        clk_out3_ak_clock;
+  wire        clk_out4_ak_clock;
+  wire        clk_out5_ak_clock;
+  wire        clk_out6_ak_clock;
+  wire        clk_out7_ak_clock;
+
   wire [15:0] do_unused;
   wire        drdy_unused;
   wire        psdone_unused;
   wire        locked_int;
-  wire        clkfbout_clk_wiz_0;
-  wire        clkfbout_buf_clk_wiz_0;
+  wire        clkfbout_ak_clock;
+  wire        clkfbout_buf_ak_clock;
   wire        clkfboutb_unused;
-   wire clkout0b_unused;
-   wire clkout1_unused;
+    wire clkout0b_unused;
    wire clkout1b_unused;
    wire clkout2_unused;
    wire clkout2b_unused;
@@ -110,23 +123,27 @@ module clk_wiz_lab3
     .CLKOUT4_CASCADE      ("FALSE"),
     .COMPENSATION         ("ZHOLD"),
     .STARTUP_WAIT         ("FALSE"),
-    .DIVCLK_DIVIDE        (5),
-    .CLKFBOUT_MULT_F      (50.375),
+    .DIVCLK_DIVIDE        (1),
+    .CLKFBOUT_MULT_F      (10.000),
     .CLKFBOUT_PHASE       (0.000),
     .CLKFBOUT_USE_FINE_PS ("FALSE"),
-    .CLKOUT0_DIVIDE_F     (15.500),
+    .CLKOUT0_DIVIDE_F     (40.000),
     .CLKOUT0_PHASE        (0.000),
     .CLKOUT0_DUTY_CYCLE   (0.500),
     .CLKOUT0_USE_FINE_PS  ("FALSE"),
-    .CLKIN1_PERIOD        (10.0))
+    .CLKOUT1_DIVIDE       (10),
+    .CLKOUT1_PHASE        (0.000),
+    .CLKOUT1_DUTY_CYCLE   (0.500),
+    .CLKOUT1_USE_FINE_PS  ("FALSE"),
+    .CLKIN1_PERIOD        (10.000))
   mmcm_adv_inst
     // Output clocks
    (
-    .CLKFBOUT            (clkfbout_clk_wiz_0),
+    .CLKFBOUT            (clkfbout_ak_clock),
     .CLKFBOUTB           (clkfboutb_unused),
-    .CLKOUT0             (clk_out1_clk_wiz_0),
+    .CLKOUT0             (clk_out1_ak_clock),
     .CLKOUT0B            (clkout0b_unused),
-    .CLKOUT1             (clkout1_unused),
+    .CLKOUT1             (clk_out2_ak_clock),
     .CLKOUT1B            (clkout1b_unused),
     .CLKOUT2             (clkout2_unused),
     .CLKOUT2B            (clkout2b_unused),
@@ -136,8 +153,8 @@ module clk_wiz_lab3
     .CLKOUT5             (clkout5_unused),
     .CLKOUT6             (clkout6_unused),
      // Input clock control
-    .CLKFBIN             (clkfbout_buf_clk_wiz_0),
-    .CLKIN1              (clk_in1_clk_wiz_0),
+    .CLKFBIN             (clkfbout_buf_ak_clock),
+    .CLKIN1              (clk_in1_ak_clock),
     .CLKIN2              (1'b0),
      // Tied to always select the primary input clock
     .CLKINSEL            (1'b1),
@@ -161,16 +178,29 @@ module clk_wiz_lab3
     .PWRDWN              (1'b0),
     .RST                 (1'b0));
 
-
-
-  // Output buffering
+// Clock Monitor clock assigning
+//--------------------------------------
+// Output buffering
   //-----------------------------------
 
   BUFG clkf_buf
-   (.O (clkfbout_buf_clk_wiz_0),
-    .I (clkfbout_clk_wiz_0));
+   (.O (clkfbout_buf_ak_clock),
+    .I (clkfbout_ak_clock));
+
+
+
+
+
 
   BUFG clkout1_buf
    (.O   (clk_out1),
-    .I   (clk_out1_clk_wiz_0));
+    .I   (clk_out1_ak_clock));
+
+
+  BUFG clkout2_buf
+   (.O   (clk_out2),
+    .I   (clk_out2_ak_clock));
+
+
+
 endmodule
