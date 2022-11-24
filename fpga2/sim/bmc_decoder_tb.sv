@@ -78,29 +78,6 @@ module bmc_decoder_tb;
         #20;
 
         /*
-        TEST 3: Input: 0x12AB34CD, Expected Output: 0x6B
-        */
-        rst = 0;
-        axiiv = 1'b1;
-        for (int i = 31; i >= 0; i = i - 8) begin
-            axiid_alt = test2[i -: 8];
-            for (int j = i - 7; j <= i; j = j + 1) begin
-                axiid = test2[j];
-                #20;
-            end
-        end
-        axiiv = 1'b0;
-        if (axiod == 8'h6B) begin
-            $display("TEST 3 PASSED");
-        end else begin 
-            $display("TEST 3 FAILED");
-        end
-        $display("---------------------------");
-        #20;
-        rst = 1;
-        #20;
-
-        /*
         TEST 4: Input: 0x313233343536373839, Expected Output: 0x97
         */
         rst = 0;
