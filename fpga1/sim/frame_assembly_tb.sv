@@ -1,13 +1,13 @@
 `default_nettype none
 `timescale 1ns / 1ps
 
-module transmitter_tb;
+module frame_assembly_tb;
     logic clk;
     logic rst;
     logic [27:0] data_in;
     logic parity_out;
 
-    transmitter my_transmitter(.clk(clk), .rst(rst), .vin(vin), .din(din), .bmc_decode(bmc_decode), .dout(dout));
+    frame_assembly my_frame_assembly(.clk(clk), .rst(rst), .din(din), .vin(vin), .dout(dout), .ready(ready));
 
     logic [27:0] test1 = 28'h0000001;
     logic [27:0] test2 = 28'hFFFFFFE;
@@ -29,7 +29,7 @@ module transmitter_tb;
         #30;
 
         /* --------------------------------------------------------
-         *  TO-DO: TESTING THE TRANSMITTER
+         *  TO-DO: TESTING THE FRAME ASSEMBLER
          * --------------------------------------------------------
         */
 
