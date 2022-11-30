@@ -25,7 +25,7 @@ module frame_assembly(input wire clk, //6 MHZ clock
     logic EVENPARITYCOUNTER;  //TODO LATER TESTER TO SEE IF ITS 20? HOWEVER MANY PREAMBLE TO THE END BITS WIDE.  
     logic [1:0] channel_state; // This state variable defines the current channel from which information is being sent
 
-    logic [191:0] channel = 192'hFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+    logic [191:0] channel = 192'b00000000_00010000_00000000_00000000_0100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000;
     
     localparam CHANNEL_A = 2'b00;
     localparam CHANNEL_B = 2'b01;
@@ -65,7 +65,7 @@ module frame_assembly(input wire clk, //6 MHZ clock
             frame_ready <= 0; 
             dout <= 0; 
             logicalin <= 0; 
-            newdatain <= 0; 
+            newdatain <= 0; //Should be 0 at the end of preamble  
             preamble_counter <= 0;
             aux_counter <= 0; 
             data_counter <= 0; 
@@ -82,8 +82,15 @@ module frame_assembly(input wire clk, //6 MHZ clock
                     begin 
                         parity_counter <= 0; //FULL LOOP 
                         if (channel_state == CHANNEL_A) begin
-                            preamble_counter <= preamble_counter + 1; 
-                            if (preamble_counter  == 0) begin 
+                            preamble_counter <= preamble_counter + 1;
+                            
+                            // if (preamble_counter == 0) begin //This will only happen when we initilize the fpga  
+                            //     frame_ready <= 1; 
+                            //     preamblestate <= START0;  
+                            //     dout <= START0[7]; 
+                            //     previousbit <= START0[7];
+                            // end else
+                            if (preamble_counter  == 0 ) begin 
                                 frame_ready <= 1; // POTENTIAL ERROR THAT FRAME IS NOT SEEN BY FIFO  We assume that for 8 cycles we will get back the data this is asking data from the FIFO                                 
                                 if(frame_counter == 0) begin //This is the logic for the start bit 
                                     if (previousbit == 0)  begin 
@@ -111,9 +118,12 @@ module frame_assembly(input wire clk, //6 MHZ clock
                                     end 
                                 end 
                             end 
+                      
+                            
 
                             //Now we will begin to send the preamble
-                            if (preamble_counter < 8) begin 
+                            else if (preamble_counter < 8) begin 
+                                frame_ready <= 0; 
                                 dout <= preamblestate[7-preamble_counter]; 
                                 previousbit <= preamblestate[7-preamble_counter];
                                 if (preamble_counter == 7) begin 
@@ -140,8 +150,9 @@ module frame_assembly(input wire clk, //6 MHZ clock
                                     dout <= RIGHT1[7]; 
                                     previousbit <= RIGHT1[7]; 
                                 end 
-                            end 
-                            if (preamble_counter < 8) begin 
+                            end
+                             
+                            else if (preamble_counter < 8) begin 
                                 dout <= preamblestate[7-preamble_counter]; 
                                 previousbit <= preamblestate[7-preamble_counter];
                                 if (preamble_counter == 7) begin 
@@ -178,8 +189,7 @@ module frame_assembly(input wire clk, //6 MHZ clock
                         //Current 0 
                         if (data_counter < 40) begin 
                             dout <= biphaseout;
-                            previousbit <= biphaseout;
-                            
+                            previousbit <= biphaseout;                            
                             newdatain <= ~newdatain;
                             if (aux_counter == 39) begin 
                                 subframestate <= VALID; 
@@ -189,14 +199,16 @@ module frame_assembly(input wire clk, //6 MHZ clock
                             end else begin 
                                 if (~newdatain) begin 
                                     evenparitytracker <= evenparitytracker ^ din[19 - (data_counter >> 1)];
+                                    logicalin <= din[19 - (data_counter >> 1)]; //MIGHT NOT WORK 
                                 end 
-                                logicalin <= din[19 - (data_counter >> 1)]; //MIGHT NOT WORK 
                             end 
                         end
                     end
 
                     VALID: 
                     begin
+                        dout <= biphaseout;
+                        previousbit <= biphaseout;                            
                         data_counter <= 0;
                         valid_counter <= valid_counter + 1;  
                         newdatain <= ~newdatain;
@@ -207,7 +219,9 @@ module frame_assembly(input wire clk, //6 MHZ clock
                         end
                     end
                     USER: 
-                    begin 
+                    begin
+                        dout <= biphaseout;
+                        previousbit <= biphaseout;                             
                         valid_counter <= 0;
                         user_counter <= user_counter + 1;  
                         newdatain <= ~newdatain;
@@ -220,6 +234,8 @@ module frame_assembly(input wire clk, //6 MHZ clock
 
                     CHANNEL: 
                     begin 
+                        dout <= biphaseout;
+                        previousbit <= biphaseout;                            
                         user_counter <= 0;
                         channel_counter <= channel_counter + 1;  
                         newdatain <= ~newdatain;
@@ -231,11 +247,14 @@ module frame_assembly(input wire clk, //6 MHZ clock
 
                     PARITY: 
                     begin 
+                        dout <= biphaseout;
+                        previousbit <= biphaseout;                            
+                        newdatain <= ~newdatain;
                         channel_counter <= 0; 
                         parity_counter <= parity_counter + 1; 
                         evenparitytracker <= 0; 
                         if(parity_counter == 1) begin 
-                            newdatain <= 0;
+                            // newdatain <= 0; //FINAL TESTCASE see if at this moment it will be 0 
                             subframe_state <= PREAMBLE; 
                             if (channel_state == CHANNEL_A) begin 
                                 channel_state <= CHANNEL_B;
@@ -245,7 +264,7 @@ module frame_assembly(input wire clk, //6 MHZ clock
                                 if (frame_counter == 191) begin 
                                     frame_counter <= 0; 
                                 end else begin 
-                                    frame_counter <= frame_counter + 1; 
+                                    frame_counter <= frame_counter + 1;
                                 end                                  
                             end 
                         end 
@@ -268,4 +287,3 @@ endmodule
 //FOR PARITY WE NEED IT TO SEND OUT ONE BIT OF THE NEXT PREAMBLE 
 //ALSO FOR PARITY STATE MACHINE WE NEED TO WE NEED THE LOGIC TO DECIDED WHICH OF THE PREAMBLE STATE WE CHOOSE IMMEDIATELY AS WELL. 
 // wE ALSO NEED to have the channel 192 bits for channel //Eric will do this. 
-//DO SOMETHING FOR DEFAULT AS WELL

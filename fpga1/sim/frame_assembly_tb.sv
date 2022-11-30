@@ -9,10 +9,6 @@ module frame_assembly_tb;
 
     frame_assembly my_frame_assembly(.clk(clk), .rst(rst), .din(din), .vin(vin), .dout(dout), .ready(ready));
 
-    logic [27:0] test1 = 28'h0000001;
-    logic [27:0] test2 = 28'hFFFFFFE;
-    logic [27:0] test3 = 28'b1001_0100_1011_1010_1000_1111_1000;
-
     always begin
         #10;
         clk = !clk;
