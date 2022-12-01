@@ -12,7 +12,7 @@ module frame_assembly_tb;
 
     frame_assembly my_frame_assembly(.clk(clk), .rst(rst), .din(din), .vin(vin), .fifo_ready(fifo_ready), .dout(dout), .frame_ready(frame_ready));
 
-    logic [19:0] test1 = 20'hFFFFF;
+    logic [19:0] test1 = 20'hFFFFE;
 
     // set of preambles
     typedef enum bit [7:0] {START0 = 8'b11101000, START1 = 8'b00010111, LEFT0 = 8'b11100010, LEFT1 = 8'b00011101,
@@ -91,11 +91,10 @@ module frame_assembly_tb;
         // if (!fail) begin
         //     $display("TEST 1 PASSED");
         // end
-        #20000;
+        #500000;
 
-        /* --------------------------------------------------------
-         *  TO-DO: TESTING THE FRAME ASSEMBLER
-         * --------------------------------------------------------
+        /*
+        NOTE: TEST MORE ROBUSTLY LATER ON
         */
 
         $display("Finishing Sim");
