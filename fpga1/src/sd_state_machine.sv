@@ -14,13 +14,14 @@ module sd_state_machine(input wire clk_25mhz,
                     output logic done, //Goes high at the end of a 512 block. 
                     output logic sd_reset, 
                     output logic sd_sck, // Sd card has its own clock
-                    output logic sd_cmd //Ignore not used
+                    output logic sd_cmd, //Ignore not used
+                    output logic seen_flag
                     
     );
     
     //setup sd stuff
-    assign sd_dat[2:1] = 2'b11;
     assign sd_reset = 0;
+    //assign sd_dat[2:1] = 2'b11;
    
      // sd_controller inputs
     logic rd;                   // read enable
@@ -60,6 +61,7 @@ module sd_state_machine(input wire clk_25mhz,
             byte_count <= 0;
             data_valid <= 1'b0;
             done <= 1'b0;
+            seen_flag <= 1'b0;
         end else begin
             case(state)
                 INIT: begin //Wait for button press to read audio
@@ -77,7 +79,7 @@ module sd_state_machine(input wire clk_25mhz,
                 end
                 PLAYING: begin //Read 512 bytes of audio data
                     rd <= 1'b0;
- 
+                    seen_flag <= 1'b1;
                     if(byte_available & !prev_byte_available) begin //only read each byte once. 
                         data_out <= dout;
                         data_valid <= 1'b1;
