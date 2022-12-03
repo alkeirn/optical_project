@@ -3,22 +3,33 @@
 
 module top_level(input wire clk_100mhz, 
                  input wire btnr,
+                 input logic jc[0],
 
                  output logic [7:0] ja
     );
     
     logic rst;            
-    assign rst = btnr;    
-    logic locked;
-    logic clk_6144mhz;
+    assign rst = btnr; 
 
+    logic clk_6144mhz;
     clk_wiz_2 spdif_clock(.clk_in1(clk_100mhz), .clk_out1(clk_6144mhz));
     assign ja = {clk_6144mhz, clk_6144mhz, clk_6144mhz, clk_6144mhz, clk_6144mhz, clk_6144mhz, clk_6144mhz, clk_6144mhz};
+
+    logic clk_60mhz;
+    clk_wiz_60mhz receiver_clock(.clk_in1(clk_100mhz), .clk_out1(clk_60mhz));
+
+    // receiver receiver_hardware();
+    // biphasemark_decoder receiver_bmc();
+    // frame_dismantle receiver_frame();
+    // fifo fpga2_fifo();
+    // convolution fpga2_convolution();
+    // frame_assemble fpga2_transmitter();
 
     /* ///////////////////////////////////////////////////
     TO-DO LIST:
     1. Create receiver circuit (with decoder)
-    2. Send through transmission circuit
+    2. Audio Manipulation (convolution)
+    3. Send through transmission circuit
     */ ///////////////////////////////////////////////////
     
 endmodule

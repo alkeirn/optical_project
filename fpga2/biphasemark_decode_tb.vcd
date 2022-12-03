@@ -1,0 +1,85 @@
+$date
+	Fri Dec 02 22:00:07 2022
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1ps
+$end
+$scope module biphasemark_decode_tb $end
+$var wire 1 ! vout $end
+$var wire 8 " frame_counter [7:0] $end
+$var wire 1 # dout $end
+$var wire 1 $ channel $end
+$var reg 1 % clk $end
+$var reg 1 & din $end
+$var reg 1 ' rst $end
+$var reg 64 ( test1 [63:0] $end
+$var reg 1 ) vin $end
+$scope module my_biphasemark_decode $end
+$var wire 1 % clk $end
+$var wire 1 & din $end
+$var wire 1 ' rst $end
+$var wire 1 ) vin $end
+$var reg 2 * bmc_buffer [1:0] $end
+$var reg 1 + bmc_counter $end
+$var reg 1 $ channel $end
+$var reg 6 , data_counter [5:0] $end
+$var reg 1 # dout $end
+$var reg 8 - frame_counter [7:0] $end
+$var reg 1 . has_preamble_ended $end
+$var reg 8 / preamble_buffer [7:0] $end
+$var reg 8 0 preamble_counter [7:0] $end
+$var reg 1 ! vout $end
+$upscope $end
+$scope begin $ivl_for_loop0 $end
+$var integer 32 1 i [31:0] $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+#0
+$dumpvars
+b0 1
+bx 0
+bx /
+x.
+bx -
+bx ,
+x+
+bx *
+x)
+b111010001111111111111111111111111111 (
+0'
+x&
+0%
+x$
+x#
+bx "
+x!
+$end
+#10000
+1%
+#20000
+0%
+1'
+#30000
+0!
+b0 ,
+0+
+0$
+b0 *
+b0 0
+0.
+b0 "
+b0 -
+1%
+#40000
+0%
+#50000
+bx1 /
+1%
+b1000000 1
+1&
+1)
+0'
