@@ -23,42 +23,42 @@ module crcc(clk, rst, axiiv, axiid, axiov, axiod);
 
 	assign axiov = 1;
 
-	// always@(*) begin
-	// 	/* for every register in the lfsr, implement
-	// 	 * the schematic (giant case statement gets
-	// 	 * much smaller with macros, tastefully applied)
-	// 	 * we discuss above ...
-	// 	 */
-	// 	for (int i = 0; i < 8; i = i + 1) begin
-	// 		case (i)
-	// 		0: saxiod[i] = `SHIFT_IN;
-	// 		`TAPS: saxiod[i] = taxiod[i - 1] ^ `SHIFT_IN;
-	// 		default: saxiod[i] = taxiod[i - 1];
-	// 		endcase
-	// 	end
+	always@(*) begin
+		/* for every register in the lfsr, implement
+		 * the schematic (giant case statement gets
+		 * much smaller with macros, tastefully applied)
+		 * we discuss above ...
+		 */
+		for (int i = 0; i < 8; i = i + 1) begin
+			case (i)
+			0: saxiod[i] = `SHIFT_IN;
+			`TAPS: saxiod[i] = taxiod[i - 1] ^ `SHIFT_IN;
+			default: saxiod[i] = taxiod[i - 1];
+			endcase
+		end
 
-	// 	/*	AXI output corresponds to the current bit-reversed value of
-	// 	 * 	the CRC. We loop to obtain this value.
-	// 	*/
-	// 	for (int k = 0; k < 8; k = k + 1) begin 
-	// 		 axiod[k] = taxiod[7 - k];
-	// 	end
-	// end
+		/*	AXI output corresponds to the current bit-reversed value of
+		 * 	the CRC. We loop to obtain this value.
+		*/
+		for (int k = 0; k < 8; k = k + 1) begin 
+			 axiod[k] = taxiod[7 - k];
+		end
+	end
 
-	// always_ff @(posedge clk) begin
-	// 	/* init 0xFF */
-	// 	if (rst) taxiod <= 8'hFF;
+	always_ff @(posedge clk) begin
+		/* init 0xFF */
+		if (rst) taxiod <= 8'hFF;
 
-	// 	/* our output validity hinges on whether
-	// 	 * we are calculating anything or not
-	// 	 * on this clock cycle. if there is no
-	// 	 * valid input for us, don't do a shift
-	//  	 * this cycle
-	// 	 */
-	// 	else begin
-	// 		taxiod <= (axiiv) ? saxiod : taxiod;
-	// 	end
-	// end
+		/* our output validity hinges on whether
+		 * we are calculating anything or not
+		 * on this clock cycle. if there is no
+		 * valid input for us, don't do a shift
+	 	 * this cycle
+		 */
+		else begin
+			taxiod <= (axiiv) ? saxiod : taxiod;
+		end
+	end
 
 endmodule
 
