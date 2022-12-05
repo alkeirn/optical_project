@@ -3,7 +3,7 @@
 
 module receiver(input wire clk, 
                 input wire rst, 
-                input wire [7:0] din,
+                input wire din,
                 
                 output logic dout,
                 output logic vout);
@@ -16,7 +16,7 @@ module receiver(input wire clk,
             dout <= 0;
             vout <= 0;
         end else begin
-            if (din == 8'b1111_1111) begin
+            if (din) begin
                 if (counter0 == 0) begin
                     counter1 <= counter1 + 1;
                     vout <= 0;

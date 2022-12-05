@@ -1,7 +1,7 @@
 // Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
 // Tool Version: Vivado v.2022.1 (win64) Build 3526262 Mon Apr 18 15:48:16 MDT 2022
-// Date        : Sun Dec  4 15:27:12 2022
+// Date        : Mon Dec  5 15:56:24 2022
 // Host        : LAPTOP-RUL95I59 running 64-bit major release  (build 9200)
 // Command     : write_verilog -force obj/cpu_impl_netlist.v -mode timesim -sdf_anno true
 // Design      : top_level
@@ -12,45 +12,23 @@
 `timescale 1 ps / 1 ps
 `define XIL_TIMING
 
-module clk_wiz_60mhz_clk_wiz
-   (clk,
-    lopt);
-  input clk;
-  output lopt;
+module clk_wiz_receiver_clk_wiz
+   (clk_out2,
+    clk_100mhz);
+  output clk_out2;
+  input clk_100mhz;
 
-  wire clk;
-  wire clk_in1_clk_wiz_60mhz;
-
-  assign lopt = clk_in1_clk_wiz_60mhz;
-  (* BOX_TYPE = "PRIMITIVE" *) 
-  (* CAPACITANCE = "DONT_CARE" *) 
-  (* IBUF_DELAY_VALUE = "0" *) 
-  (* IFD_DELAY_VALUE = "AUTO" *) 
-  IBUF #(
-    .IOSTANDARD("DEFAULT")) 
-    clkin1_ibufg
-       (.I(clk),
-        .O(clk_in1_clk_wiz_60mhz));
-endmodule
-
-module clk_wiz_6144mhz_clk_wiz
-   (clk_out1,
-    clk,
-    lopt);
-  output clk_out1;
-  input clk;
-  input lopt;
-
-  wire clk_out1;
-  wire clk_out1_clk_wiz_6144mhz;
-  wire clkfbout_buf_clk_wiz_6144mhz;
-  wire clkfbout_clk_wiz_6144mhz;
-  wire lopt;
+  wire clk_100mhz;
+  wire clk_in1_clk_wiz_receiver;
+  wire clk_out2;
+  wire clk_out2_clk_wiz_receiver;
+  wire clkfbout_buf_clk_wiz_receiver;
+  wire clkfbout_clk_wiz_receiver;
   wire NLW_mmcm_adv_inst_CLKFBOUTB_UNCONNECTED;
   wire NLW_mmcm_adv_inst_CLKFBSTOPPED_UNCONNECTED;
   wire NLW_mmcm_adv_inst_CLKINSTOPPED_UNCONNECTED;
+  wire NLW_mmcm_adv_inst_CLKOUT0_UNCONNECTED;
   wire NLW_mmcm_adv_inst_CLKOUT0B_UNCONNECTED;
-  wire NLW_mmcm_adv_inst_CLKOUT1_UNCONNECTED;
   wire NLW_mmcm_adv_inst_CLKOUT1B_UNCONNECTED;
   wire NLW_mmcm_adv_inst_CLKOUT2_UNCONNECTED;
   wire NLW_mmcm_adv_inst_CLKOUT2B_UNCONNECTED;
@@ -66,26 +44,35 @@ module clk_wiz_6144mhz_clk_wiz
 
   (* BOX_TYPE = "PRIMITIVE" *) 
   BUFG clkf_buf
-       (.I(clkfbout_clk_wiz_6144mhz),
-        .O(clkfbout_buf_clk_wiz_6144mhz));
+       (.I(clkfbout_clk_wiz_receiver),
+        .O(clkfbout_buf_clk_wiz_receiver));
   (* BOX_TYPE = "PRIMITIVE" *) 
-  BUFG clkout1_buf
-       (.I(clk_out1_clk_wiz_6144mhz),
-        .O(clk_out1));
+  (* CAPACITANCE = "DONT_CARE" *) 
+  (* IBUF_DELAY_VALUE = "0" *) 
+  (* IFD_DELAY_VALUE = "AUTO" *) 
+  IBUF #(
+    .IOSTANDARD("DEFAULT")) 
+    clkin1_ibufg
+       (.I(clk_100mhz),
+        .O(clk_in1_clk_wiz_receiver));
   (* BOX_TYPE = "PRIMITIVE" *) 
-  (* OPT_MODIFIED = "MLO" *) 
+  BUFG clkout2_buf
+       (.I(clk_out2_clk_wiz_receiver),
+        .O(clk_out2));
+  (* BOX_TYPE = "PRIMITIVE" *) 
+  (* OPT_MODIFIED = "SWEEP" *) 
   MMCME2_ADV #(
     .BANDWIDTH("OPTIMIZED"),
-    .CLKFBOUT_MULT_F(44.375000),
+    .CLKFBOUT_MULT_F(32.250000),
     .CLKFBOUT_PHASE(0.000000),
     .CLKFBOUT_USE_FINE_PS("FALSE"),
     .CLKIN1_PERIOD(10.000000),
     .CLKIN2_PERIOD(0.000000),
-    .CLKOUT0_DIVIDE_F(120.375000),
+    .CLKOUT0_DIVIDE_F(10.750000),
     .CLKOUT0_DUTY_CYCLE(0.500000),
     .CLKOUT0_PHASE(0.000000),
     .CLKOUT0_USE_FINE_PS("FALSE"),
-    .CLKOUT1_DIVIDE(1),
+    .CLKOUT1_DIVIDE(105),
     .CLKOUT1_DUTY_CYCLE(0.500000),
     .CLKOUT1_PHASE(0.000000),
     .CLKOUT1_USE_FINE_PS("FALSE"),
@@ -111,7 +98,7 @@ module clk_wiz_6144mhz_clk_wiz
     .CLKOUT6_PHASE(0.000000),
     .CLKOUT6_USE_FINE_PS("FALSE"),
     .COMPENSATION("ZHOLD"),
-    .DIVCLK_DIVIDE(6),
+    .DIVCLK_DIVIDE(5),
     .IS_CLKINSEL_INVERTED(1'b0),
     .IS_PSEN_INVERTED(1'b0),
     .IS_PSINCDEC_INVERTED(1'b0),
@@ -124,17 +111,17 @@ module clk_wiz_6144mhz_clk_wiz
     .SS_MOD_PERIOD(10000),
     .STARTUP_WAIT("FALSE")) 
     mmcm_adv_inst
-       (.CLKFBIN(clkfbout_buf_clk_wiz_6144mhz),
-        .CLKFBOUT(clkfbout_clk_wiz_6144mhz),
+       (.CLKFBIN(clkfbout_buf_clk_wiz_receiver),
+        .CLKFBOUT(clkfbout_clk_wiz_receiver),
         .CLKFBOUTB(NLW_mmcm_adv_inst_CLKFBOUTB_UNCONNECTED),
         .CLKFBSTOPPED(NLW_mmcm_adv_inst_CLKFBSTOPPED_UNCONNECTED),
-        .CLKIN1(lopt),
+        .CLKIN1(clk_in1_clk_wiz_receiver),
         .CLKIN2(1'b0),
         .CLKINSEL(1'b1),
         .CLKINSTOPPED(NLW_mmcm_adv_inst_CLKINSTOPPED_UNCONNECTED),
-        .CLKOUT0(clk_out1_clk_wiz_6144mhz),
+        .CLKOUT0(NLW_mmcm_adv_inst_CLKOUT0_UNCONNECTED),
         .CLKOUT0B(NLW_mmcm_adv_inst_CLKOUT0B_UNCONNECTED),
-        .CLKOUT1(NLW_mmcm_adv_inst_CLKOUT1_UNCONNECTED),
+        .CLKOUT1(clk_out2_clk_wiz_receiver),
         .CLKOUT1B(NLW_mmcm_adv_inst_CLKOUT1B_UNCONNECTED),
         .CLKOUT2(NLW_mmcm_adv_inst_CLKOUT2_UNCONNECTED),
         .CLKOUT2B(NLW_mmcm_adv_inst_CLKOUT2B_UNCONNECTED),
@@ -159,23 +146,21 @@ module clk_wiz_6144mhz_clk_wiz
         .RST(1'b0));
 endmodule
 
-(* ECO_CHECKSUM = "848c5072" *) 
+(* ECO_CHECKSUM = "cef93744" *) 
 (* NotValidForBitStream *)
 module top_level
-   (clk,
+   (clk_100mhz,
     btnc,
-    jc,
+    jcinput,
     ja);
-  input clk;
+  input clk_100mhz;
   input btnc;
-  input [7:0]jc;
+  input jcinput;
   output [7:0]ja;
 
-  (* IBUF_LOW_PWR *) wire clk;
+  (* IBUF_LOW_PWR *) wire clk_100mhz;
   wire [7:0]ja;
   wire [0:0]ja_OBUF;
-  wire lopt;
-  wire NLW_spdif_clock_clk_UNCONNECTED;
 
 initial begin
  $sdf_annotate("cpu_impl_netlist.sdf",,,,"tool_control");
@@ -204,13 +189,9 @@ end
   OBUF \ja_OBUF[7]_inst 
        (.I(ja_OBUF),
         .O(ja[7]));
-  clk_wiz_60mhz_clk_wiz receiver_clock
-       (.clk(clk),
-        .lopt(lopt));
-  clk_wiz_6144mhz_clk_wiz spdif_clock
-       (.clk(NLW_spdif_clock_clk_UNCONNECTED),
-        .clk_out1(ja_OBUF),
-        .lopt(lopt));
+  clk_wiz_receiver_clk_wiz receiver_spdif_clock
+       (.clk_100mhz(clk_100mhz),
+        .clk_out2(ja_OBUF));
 endmodule
 `ifndef GLBL
 `define GLBL

@@ -3,7 +3,7 @@
 
 module top_level(input wire clk_100mhz, 
                  input wire btnc,
-                 input wire [7:0] jc,
+                 input wire jcinput,
 
                  output logic [7:0] ja
     );
@@ -19,15 +19,16 @@ module top_level(input wire clk_100mhz,
     assign rst = btnc; 
 
     logic clk_6144mhz;
-    clk_wiz_6144mhz_clk_wiz spdif_clock(.clk_in1(clk_100mhz), .clk_out1(clk_6144mhz));
+    // clk_wiz_6144mhz_clk_wiz spdif_clock(.clk_in1(clk_100mhz), .clk_out1(clk_6144mhz));
     assign ja = {clk_6144mhz, clk_6144mhz, clk_6144mhz, clk_6144mhz, clk_6144mhz, clk_6144mhz, clk_6144mhz, clk_6144mhz};
 
     logic clk_60mhz;
-    clk_wiz_60mhz_clk_wiz receiver_clock(.clk_in1(clk_100mhz), .clk_out1(clk_60mhz));
+    // clk_wiz_60mhz_clk_wiz receiver_clock(.clk_in1(clk_100mhz), .clk_out1(clk_60mhz));
+    clk_wiz_receiver_clk_wiz receiver_spdif_clock(.clk_in1(clk_100mhz), .clk_out1(clk_60mhz), .clk_out2(clk_6144mhz));
 
     logic dout;
     logic vout;
-    receiver our_receiver(.clk(clk_60mhz), .rst(btnc), .din(jc), .dout(dout), .vout(vout));
+    receiver our_receiver(.clk(clk_60mhz), .rst(btnc), .din(jcinput), .dout(dout), .vout(vout));
 
     // biphasemark_decoder receiver_bmc();
     // frame_dismantle receiver_frame();
