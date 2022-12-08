@@ -60,9 +60,9 @@ module frame_dismantle (input wire clk,
             subframe_counter <= 0;
             aux_buffer <= 0;
             data_buffer <= 0; 
-            crc_buffer <= 0;
-            crc_vin <= 0;
-            crc_din <= 0;
+            channel_buffer <= 0;
+            axiiv_crc <= 0;
+            axiid_crc <= 0;
             invalid <= 0;
             evenparitytracker <= 0;
 
@@ -73,7 +73,7 @@ module frame_dismantle (input wire clk,
                 case(subframestate)
                     AUX: 
                     begin 
-                        crc_buffer <= (frame_counter == 0) ? 0 : crc_buffer;   // We must empty out the entire crc_buffer whenever we start a block
+                        channel_buffer <= (frame_counter == 0) ? 0 : channel_buffer;   // We must empty out the entire crc_buffer whenever we start a block
                         kill <= 0;
                         done <= 0;
                         vout <= 0;

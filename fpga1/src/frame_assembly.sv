@@ -4,6 +4,7 @@
 module frame_assembly(input wire clk, // 6.144 MHZ clock 
                    input wire rst,
                    input wire [19:0] din, // 20 bits from FIFO  
+                   input wire vin, // data is valid 
                    input wire fifo_ready,  // ready signal from the FIFO that allows for frame assembly to start 
                                            // this will always be on; situations where it will be off are:
                                            // when the fifo is filling up at the begining, or when fifo runs out or command to stop 
@@ -257,8 +258,3 @@ module frame_assembly(input wire clk, // 6.144 MHZ clock
 endmodule
 
 `default_nettype wire
-
-// todo NEED PREVIOUS BIT BEING SET FOR EVERYTHING AFTER PREAMBLE AND NEED DOUT TO GO TO BIPHASE OUT. 
-// FOR PARITY WE NEED IT TO SEND OUT ONE BIT OF THE NEXT PREAMBLE 
-// ALSO FOR PARITY STATE MACHINE WE NEED TO WE NEED THE LOGIC TO DECIDED WHICH OF THE PREAMBLE STATE WE CHOOSE IMMEDIATELY AS WELL. 
-// wE ALSO NEED to have the channel 192 bits for channel // Eric will do this. 

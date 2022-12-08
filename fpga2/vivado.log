@@ -2,11 +2,45 @@
 # Vivado v2022.1 (64-bit)
 # SW Build 3526262 on Mon Apr 18 15:48:16 MDT 2022
 # IP Build 3524634 on Mon Apr 18 20:55:01 MDT 2022
-# Start of session at: Thu Nov 17 18:24:49 2022
-# Process ID: 31096
-# Current directory: C:/Users/Administrator/Documents/project/optical_project/fpga2
-# Command line: vivado.exe -mode batch -source build.tcl
-# Log file: C:/Users/Administrator/Documents/project/optical_project/fpga2/vivado.log
-# Journal file: C:/Users/Administrator/Documents/project/optical_project/fpga2\vivado.jou
+# Start of session at: Mon Dec  5 15:58:39 2022
+# Process ID: 4576
+# Current directory: C:/Users/Louis Martinez/Documents/MIT/Fall 2022/6.205/project/optical_project/fpga2
+# Command line: vivado.exe
+# Log file: C:/Users/Louis Martinez/Documents/MIT/Fall 2022/6.205/project/optical_project/fpga2/vivado.log
+# Journal file: C:/Users/Louis Martinez/Documents/MIT/Fall 2022/6.205/project/optical_project/fpga2\vivado.jou
 # Running On: LAPTOP-RUL95I59, OS: Windows, CPU Frequency: 1498 MHz, CPU Physical cores: 4, Host memory: 16946 MB
 #-----------------------------------------------------------
+start_gui
+WARNING: [Board 49-26] cannot add Board Part xilinx.com:vpk120_es:part0:1.2 available at C:/Xilinx/Vivado/2022.1/data/xhub/boards/XilinxBoardStore/boards/Xilinx/vpk120/es/1.2/board.xml as part xcvp1202-vsva2785-2mp-e-s-es1 specified in board_part file is either invalid or not available
+WARNING: [Board 49-26] cannot add Board Part xilinx.com:vpk120_es_revb:part0:1.0 available at C:/Xilinx/Vivado/2022.1/data/xhub/boards/XilinxBoardStore/boards/Xilinx/vpk120_revb/es/1.0/board.xml as part xcvp1202-vsva2785-2mp-e-s-es1 specified in board_part file is either invalid or not available
+WARNING: [Board 49-26] cannot add Board Part xilinx.com:zcu208ld:part0:2.0 available at C:/Xilinx/Vivado/2022.1/data/xhub/boards/XilinxBoardStore/boards/Xilinx/zcu208ld/production/2.0/board.xml as part xczu58dr-fsvg1517-2-i specified in board_part file is either invalid or not available
+WARNING: [Board 49-26] cannot add Board Part xilinx.com:zcu216ld:part0:2.0 available at C:/Xilinx/Vivado/2022.1/data/xhub/boards/XilinxBoardStore/boards/Xilinx/zcu216ld/production/2.0/board.xml as part xczu59dr-ffvf1760-2-i specified in board_part file is either invalid or not available
+WARNING: [Board 49-26] cannot add Board Part xilinx.com:zcu670:part0:2.0 available at C:/Xilinx/Vivado/2022.1/data/xhub/boards/XilinxBoardStore/boards/Xilinx/zcu670/2.0/board.xml as part xczu67dr-fsve1156-2-i specified in board_part file is either invalid or not available
+WARNING: [Board 49-26] cannot add Board Part xilinx.com:zcu670ld:part0:1.0 available at C:/Xilinx/Vivado/2022.1/data/xhub/boards/XilinxBoardStore/boards/Xilinx/zcu670ld/1.0/board.xml as part xczu57dr-fsve1156-2-i specified in board_part file is either invalid or not available
+open_project {C:/Users/Louis Martinez/WHATEVER/WHATEVER.xpr}
+Scanning sources...
+Finished scanning sources
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository 'C:/Xilinx/Vivado/2022.1/data/ip'.
+update_compile_order -fileset sources_1
+WARNING: [IP_Flow 19-4067] Ignoring invalid widget type specified checkbox.Providing a default widget
+create_ip -name ila -vendor xilinx.com -library ip -version 6.2 -module_name ila_receiver
+set_property -dict [list CONFIG.C_DATA_DEPTH {8192} CONFIG.Component_Name {ila_receiver}] [get_ips ila_receiver]
+WARNING: [Vivado 12-3523] Attempt to change 'Component_Name' from 'ila_receiver' to 'ila_receiver' is not allowed and is ignored.
+generate_target {instantiation_template} [get_files {{c:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/ila_receiver/ila_receiver.xci}}]
+INFO: [IP_Flow 19-1686] Generating 'Instantiation Template' target for IP 'ila_receiver'...
+update_compile_order -fileset sources_1
+generate_target all [get_files  {{c:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/ila_receiver/ila_receiver.xci}}]
+INFO: [IP_Flow 19-1686] Generating 'Synthesis' target for IP 'ila_receiver'...
+WARNING: [IP_Flow 19-4994] Overwriting existing constraint file 'c:/Users/Louis Martinez/WHATEVER/WHATEVER.gen/sources_1/ip/ila_receiver/ila_receiver_ooc.xdc'
+INFO: [IP_Flow 19-1686] Generating 'Simulation' target for IP 'ila_receiver'...
+INFO: [IP_Flow 19-1686] Generating 'Implementation' target for IP 'ila_receiver'...
+INFO: [IP_Flow 19-1686] Generating 'Change Log' target for IP 'ila_receiver'...
+catch { config_ip_cache -export [get_ips -all ila_receiver] }
+export_ip_user_files -of_objects [get_files {{c:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/ila_receiver/ila_receiver.xci}}] -no_script -sync -force -quiet
+create_ip_run [get_files -of_objects [get_fileset sources_1] {{c:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/ila_receiver/ila_receiver.xci}}]
+launch_runs ila_receiver_synth_1 -jobs 4
+[Mon Dec  5 16:00:06 2022] Launched ila_receiver_synth_1...
+Run output will be captured here: C:/Users/Louis Martinez/WHATEVER/WHATEVER.runs/ila_receiver_synth_1/runme.log
+export_simulation -of_objects [get_files {{c:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/ila_receiver/ila_receiver.xci}}] -directory {C:/Users/Louis Martinez/WHATEVER/WHATEVER.ip_user_files/sim_scripts} -ip_user_files_dir {C:/Users/Louis Martinez/WHATEVER/WHATEVER.ip_user_files} -ipstatic_source_dir {C:/Users/Louis Martinez/WHATEVER/WHATEVER.ip_user_files/ipstatic} -lib_map_path [list {modelsim=C:/Users/Louis Martinez/WHATEVER/WHATEVER.cache/compile_simlib/modelsim} {questa=C:/Users/Louis Martinez/WHATEVER/WHATEVER.cache/compile_simlib/questa} {riviera=C:/Users/Louis Martinez/WHATEVER/WHATEVER.cache/compile_simlib/riviera} {activehdl=C:/Users/Louis Martinez/WHATEVER/WHATEVER.cache/compile_simlib/activehdl}] -use_ip_compiled_libs -force -quiet
