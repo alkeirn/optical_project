@@ -6,6 +6,7 @@ module sd_state_machine(input wire clk_25mhz,
                     input wire rst, 
                     input wire read_signal, //Signal to start reading a 512 byte block
                     input wire [31:0] address,
+                    input wire debug_clk,
 
                     inout wire [3:0] sd_dat, //sd_data, used for read/write. Ignore for our application
 
@@ -19,9 +20,11 @@ module sd_state_machine(input wire clk_25mhz,
                     
     );
     
+    //ila_0 ila(.clk(debug_clk), .probe0(byte_available), .probe1(read_signal), .probe2(state), .probe3(data_out));
+    
     //setup sd stuff
     assign sd_reset = 0;
-    //assign sd_dat[2:1] = 2'b11;
+    assign sd_dat[2:1] = 2'b11;
    
      // sd_controller inputs
     logic rd;                   // read enable

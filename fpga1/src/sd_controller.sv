@@ -274,3 +274,5 @@ module sd_controller(
     assign mosi = cmd_mode ? cmd_out[55] : data_sig[7];
     assign ready = (state == IDLE);
 endmodule
+
+`default_nettype wire

@@ -1,4 +1,5 @@
 `default_nettype none
+`timescale 1ns / 1ps
 
 module top_level(input wire clk_100mhz, 
                     input wire sd_cd,
@@ -7,7 +8,7 @@ module top_level(input wire clk_100mhz,
                     input wire btnu,
                     input wire btnd,
                              
-                    input wire [3:0] sd_dat,
+                    inout wire [3:0] sd_dat,
                        
                     output logic [15:0] led,
                     output logic sd_reset, 
@@ -24,12 +25,12 @@ module top_level(input wire clk_100mhz,
     logic empty;
     logic [7:0] fifo_dout;
     logic rd_en; 
-    logic empty_flag;
+    logic empty_512;
     logic fifo_ready;
 
     //Sd values
     parameter [31:0] song0_addr_start = 0;
-    parameter [31:0] song0_addr_end = 'd512; //change later
+    parameter [31:0] song0_addr_end = 'd20408000; //change later
     parameter [31:0] song1_addr_start = 1; //change later
     parameter [31:0] song1_addr_end = 0;
     parameter [31:0] song2_addr_start = 2; //change later
@@ -45,7 +46,7 @@ module top_level(input wire clk_100mhz,
     logic [31:0] end_addr = song0_addr_end;
 
     //Top level state machine
-    typedef enum {WAIT, FIRST_BLOCK, TRANSMIT} states;
+    typedef enum {WAIT, FIRST_BLOCK, TRANSMIT, END_OF_READ} states;
     states state;
 
     logic rst; // system reset
@@ -64,11 +65,24 @@ module top_level(input wire clk_100mhz,
     logic clk_buff_100mhz;
     logic clk_6144mhz;
 
-    // generate 25 mhz clock for sd_controller 
-    //clk_100mhz_25mhz clock_gen1(.clk_in1(clk_100mhz), .clk_out1(clk_25mhz),.clk_out2(clk_buff_100mhz));
-    //clk_wiz_2 spdif_clock(.clk_in1(clk_100mhz), .clk_out1(clk_6144mhz)); //This fails on dcp file
-    //clk_wiz_6144 clock_gen2(.clk_in1(clk_buff_100mhz), .clk_out1(clk_6144mhz));
+    // generate 25 mhz clock for sd_controller and 6.144 mhz clock for transmission 
     clk_wiz clk_gen(.clk_in1(clk_100mhz), .clk_out1(clk_25mhz), .clk_out2(clk_buff_100mhz), .clk_out3(clk_6144mhz));
+
+    //clk crossing variables
+    //bram
+    logic web;
+    logic wea;
+    logic [8:0] doutb;
+    logic [8:0] douta;
+    logic [1:0] addra;
+    logic [1:0] addrb;
+    logic [8:0] dina;
+    logic [8:0] dinb;
+
+    //clk crossing state machines
+    logic [19:0] crossed_dout;
+    logic crossed_data_valid;
+    logic crossed_fifo_ready;
 
     //Debouncers for selection buttons
     debouncer btnc_db(.clk_in(clk_25mhz),
@@ -92,6 +106,7 @@ module top_level(input wire clk_100mhz,
                     .read_signal(read_signal), //used to read from sd card
                     .address(current_addr), //address to read at for sd card. Must be a multiple of 512 bytes. 
                     .sd_dat(sd_dat),
+                    .debug_clk(clk_buff_100mhz),
 
                     .data_out(sd_data_out), //one byte audio data
                     .data_valid(sd_data_valid), //data is new and valid (high for one clock cycle)
@@ -109,15 +124,45 @@ module top_level(input wire clk_100mhz,
                                 .an_out(an));
 
     fifo_generator_0 fif0(.full(full), .din(sd_data_out), .wr_en(wr_en), 
-                         .empty(empty), .dout(fifo_dout), .rd_en(frame_ready), 
-                         .clk(clk_25mhz), .srst(rst), .prog_empty(empty_flag));
+                         .empty(empty), .dout(fifo_dout), .rd_en(rd_en), 
+                         .clk(clk_25mhz), .srst(rst), .prog_empty(empty_512));
+
+    //clock crossing modules
+    clk_cross_top tp(.clk_25mhz(clk_25mhz),
+                     .rst(rst),
+                     .fifo_din(fifo_dout), //bytes from the fifo
+                     .bram_douta(douta), //9 bit bata from the bram
+                     .fifo_ready(fifo_ready), //fifo ready signal from top level state machine. High means data in fifo
+                     
+                     .bram_addra(addra), //address of bram to read/write to
+                     .bram_dina(dina), //data into the bram for writes
+                     .bram_wea(wea), //bram write enable
+                     .rd_en(rd_en));
+
+    clk_cross_transmit tr(.clk_6144mhz(clk_6144mhz),
+                          .rst(rst),
+                          .bram_doutb(doutb), //9 bit bata from the bram
+                          .frame_ready(frame_ready), //High when requesting new data
+                          
+                          .bram_web(web), //write/read enable
+                          .bram_addrb(addrb), //address for read/write in bram
+                          .bram_dinb(dinb), //data written into bram
+                          .fifo_ready(crossed_fifo_ready), //signal for valid data coming down the line
+                          .data_out(crossed_dout),
+                          .new_data_valid(crossed_data_valid));
+                          
+    blk_mem_gen_0 bmg(.clka(clk_25mhz), .wea(wea), .addra(addra),
+                      .dina(dina), .douta(douta), .clkb(clk_6144mhz),
+                      .web(web), .addrb(addrb), .dinb(dinb), .doutb(doutb)); 
+                      
+    //ila_0 ila(.clk(clk_buff_100mhz), .probe0(rd_en), .probe1(crossed_fifo_ready), .probe2(state), .probe3(dina));
 
     // frame assembly
     logic dout; //transmitted data
     logic frame_ready; //acts as a read enable for the fifo
     assign ja = {dout, dout, dout, dout, dout, dout, dout, dout};
 
-    frame_assembly transmission(.clk(clk_6144mhz), .rst(btnr), .din(fifo_dout), .fifo_ready(fifo_ready), .dout(dout), .frame_ready(frame_ready));
+    frame_assembly transmission(.clk(clk_6144mhz), .rst(rst), .din(crossed_dout), .fifo_ready(crossed_fifo_ready), .dout(dout), .frame_ready(frame_ready));
   
     // COMBINATIONAL LOGIC
     assign rst = btnr; 
@@ -191,20 +236,26 @@ module top_level(input wire clk_100mhz,
 
                 TRANSMIT: begin
                     if(current_addr >= end_addr) begin //Done with the song. 
-                        state <= WAIT;
-                        fifo_ready <= 1'b0; //reset to alert module
+                        state <= END_OF_READ;
                     end else begin
-                        if(empty_flag & !sd_busy) begin //check if we hav 512 bytes available in FIFO. If so, start a new write
+                        if(empty_512 & !sd_busy) begin //check if we hav 512 bytes available in FIFO. If so, start a new write
                             read_signal <= 1'b1;
                             sd_busy <= 1'b1;
                         end else if(sd_done) begin //SD finished, change busy flag to allow for next cycle
                             sd_busy <= 1'b0;
                             read_signal <= 1'b0;
+                            current_addr <= current_addr + 4096;
                         end else begin //No space, or sd is busy writing. 
                             read_signal <= 1'b0;
                         end  
                     end
                 end 
+                END_OF_READ: begin //let the rest of the song be read out of the fifo
+                    if(empty) begin
+                        state <= WAIT;
+                        fifo_ready <= 1'b0; //reset to alert module
+                    end
+                end
             endcase
         end
     end
