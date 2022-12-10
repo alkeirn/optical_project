@@ -49,8 +49,11 @@ module frame_dismantle (input wire clk,
     logic [7:0] axiod_crc;
     logic axiov_crc;
     logic axiiv_crc;
-    logic axiid_crc;
-    crcc crc8(.clk(clk), .rst(rst), .axiiv(axiiv_crc), .axiid(axiid_crc), .axiov(axiov_crc), .axiod(axiod_crc));
+    logic [7:0] axiid_crc;
+    logic [2:0] channel_counter;
+    logic soft_reset_i;
+    // crcc crc8(.clk(clk), .rst(rst), .axiiv(axiiv_crc), .axiid(axiid_crc), .axiov(axiov_crc), .axiod(axiod_crc));
+    crc_calc #(.POLY(8'h1D), .CRC_SIZE(8), .DATA_WIDTH(8), .INIT(8'hFF), .REF_IN(1), .REF_OUT(1), .XOR_OUT(8'h0)) my_crc_calc(.clk_i(clk), .rst_i(rst), .soft_reset_i(soft_reset_i), .valid_i(axiiv_crc), .data_i(axiid_crc), .crc_o(axiod_crc));
     // parity tracker  
     logic evenparitytracker;
 
@@ -65,6 +68,7 @@ module frame_dismantle (input wire clk,
             axiid_crc <= 0;
             invalid <= 0;
             evenparitytracker <= 0;
+            channel_counter <= 0;
 
             kill <= 0;
             done <= 0;
@@ -73,7 +77,7 @@ module frame_dismantle (input wire clk,
                 case(subframestate)
                     AUX: 
                     begin 
-                        channel_buffer <= (frame_counter == 0) ? 0 : channel_buffer;   // We must empty out the entire crc_buffer whenever we start a block
+                        channel_buffer <= (frame_counter == 0 && !in_channel) ? 0 : channel_buffer;   // We must empty out the entire crc_buffer whenever we start a block
                         kill <= 0;
                         done <= 0;
                         vout <= 0;
@@ -82,16 +86,21 @@ module frame_dismantle (input wire clk,
                         // frame here should be 0 at the start
                         evenparitytracker <= evenparitytracker ^ din;
                         subframe_counter <= subframe_counter + 1;
-                        aux_buffer <= {aux_buffer[2:0], din};
+                        if (!in_channel) begin
+                            aux_buffer <= {aux_buffer[2:0], din};
+                        end
                         if (subframe_counter == 3) begin
                             subframestate <= DATA;
                         end 
                     end
+
                     DATA: 
                     begin 
                         evenparitytracker <= evenparitytracker ^ din;
                         subframe_counter <= subframe_counter + 1;
-                        data_buffer <= {data_buffer[18:0], din};
+                        if (!in_channel) begin
+                            data_buffer <= {data_buffer[18:0], din};
+                        end
                         if (subframe_counter == 23) begin
                             subframestate <= VALID; 
                         end  
@@ -119,18 +128,17 @@ module frame_dismantle (input wire clk,
                         evenparitytracker <= evenparitytracker ^ din;
                         subframe_counter <= subframe_counter + 1;
                         subframestate <= PARITY;
-                        if (frame_counter < 191) begin
-                            axiid_crc <= din;
-                            axiiv_crc <= 1;
+                        if (frame_counter <= 191 && !in_channel) begin
                             channel_buffer <= {channel_buffer[190:0], din};
-                        end else if (frame_counter == 191) begin
-                            if ({channel_buffer[6:0], din} != axiod_crc) begin
-                                kill <= 1;
+                            if (channel_counter == 7) begin
+                                channel_counter <= 0;
+                                axiid_crc <= {channel_buffer[6:0], din};
+                                axiiv_crc <= 1;
                             end else begin
-                                channeldout <= {channel_buffer[190:0], din};
-                                channelvout <= 1;
+                                channel_counter <= channel_counter + 1;
+                                axiiv_crc <= 0;
                             end
-                        end
+                        end 
                     end
 
                     PARITY: 
@@ -142,15 +150,21 @@ module frame_dismantle (input wire clk,
                         aux_buffer <= 0;
                         data_buffer <= 0;
                         
-                        if (evenparitytracker == din && !invalid) begin
+                        if (evenparitytracker == din && !invalid && !in_channel) begin
                             dout <= data_buffer;
                             dauxout <= aux_buffer;
                             vout <= 1;
                             vauxout <= 1;
                         end
 
-                        if (frame_counter == 191) begin
+                        if (frame_counter == 191 && in_channel) begin
                             done <= 1;
+                            if (channel_buffer[7:0] != axiod_crc) begin
+                                kill <= 1;
+                            end else begin
+                                channeldout <= channel_buffer[7:0];
+                                channelvout <= 1;
+                            end
                         end
                     end
 

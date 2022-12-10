@@ -2,12 +2,12 @@
 # Vivado v2022.1 (64-bit)
 # SW Build 3526262 on Mon Apr 18 15:48:16 MDT 2022
 # IP Build 3524634 on Mon Apr 18 20:55:01 MDT 2022
-# Start of session at: Mon Dec  5 15:58:39 2022
-# Process ID: 4576
+# Start of session at: Fri Dec  9 18:51:36 2022
+# Process ID: 7784
 # Current directory: C:/Users/Louis Martinez/Documents/MIT/Fall 2022/6.205/project/optical_project/fpga2
-# Command line: vivado.exe
+# Command line: vivado.exe -mode batch -source build.tcl
 # Log file: C:/Users/Louis Martinez/Documents/MIT/Fall 2022/6.205/project/optical_project/fpga2/vivado.log
 # Journal file: C:/Users/Louis Martinez/Documents/MIT/Fall 2022/6.205/project/optical_project/fpga2\vivado.jou
 # Running On: LAPTOP-RUL95I59, OS: Windows, CPU Frequency: 1498 MHz, CPU Physical cores: 4, Host memory: 16946 MB
 #-----------------------------------------------------------
-start_gui
+source build.tcl

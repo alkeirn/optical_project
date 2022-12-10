@@ -1,7 +1,7 @@
 `default_nettype none
 `timescale 1ns / 1ps
 
-`define SHIFT_IN (taxiod[7] ^ axiid)
+// `define SHIFT_IN (taxiod[7] ^ axiid[j])
 `define TAPS 2, 3, 4
 
 /*---------------------------------------------------------------------------------------------
@@ -14,7 +14,8 @@
 module crcc(clk, rst, axiiv, axiid, axiov, axiod);
 
 	input logic clk, rst;
-	input logic axiiv, axiid;
+	input logic axiiv; 
+	input logic [7:0] axiid;
 
 	output logic axiov;
 	output logic[7:0] axiod;
@@ -24,24 +25,26 @@ module crcc(clk, rst, axiiv, axiid, axiov, axiod);
 	assign axiov = 1;
 
 	always@(*) begin
-		/* for every register in the lfsr, implement
-		 * the schematic (giant case statement gets
-		 * much smaller with macros, tastefully applied)
-		 * we discuss above ...
-		 */
-		for (int i = 0; i < 8; i = i + 1) begin
-			case (i)
-			0: saxiod[i] = `SHIFT_IN;
-			`TAPS: saxiod[i] = taxiod[i - 1] ^ `SHIFT_IN;
-			default: saxiod[i] = taxiod[i - 1];
-			endcase
-		end
+		for (int j = 8; j >= 0; j = j - 1) begin
+			/* for every register in the lfsr, implement
+			* the schematic (giant case statement gets
+			* much smaller with macros, tastefully applied)
+			* we discuss above ...
+			*/
+			for (int i = 0; i < 8; i = i + 1) begin
+				case (i)
+				0: saxiod[i] = (taxiod[7] ^ axiid[j]);
+				`TAPS: saxiod[i] = taxiod[i - 1] ^ (taxiod[7] ^ axiid[j]);
+				default: saxiod[i] = taxiod[i - 1];
+				endcase
+			end
 
-		/*	AXI output corresponds to the current bit-reversed value of
-		 * 	the CRC. We loop to obtain this value.
-		*/
-		for (int k = 0; k < 8; k = k + 1) begin 
-			 axiod[k] = taxiod[7 - k];
+			/*	AXI output corresponds to the current bit-reversed value of
+			* 	the CRC. We loop to obtain this value.
+			*/
+			for (int k = 0; k < 8; k = k + 1) begin 
+				axiod[k] = taxiod[7 - k];
+			end
 		end
 	end
 
