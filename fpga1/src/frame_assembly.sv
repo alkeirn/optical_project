@@ -4,12 +4,12 @@
 module frame_assembly(input wire clk, // 6.144 MHZ clock 
                    input wire rst,
                    input wire [19:0] din, // 20 bits from FIFO  
-                   input wire vin, // data is valid 
                    input wire fifo_ready,  // ready signal from the FIFO that allows for frame assembly to start 
                                            // this will always be on; situations where it will be off are:
                                            // when the fifo is filling up at the begining, or when fifo runs out or command to stop 
                    output logic dout, // output data
-                   output logic frame_ready // at the start of every frame (preamble) signal to say ready to get 20 bits from FIFO 
+                   output logic frame_ready, // at the start of every frame (preamble) signal to say ready to get 20 bits from FIFO 
+                   output logic [10:0] count
     );
     // NEED THIS: 28-bit SHIFT buffer ********************************************************************************* 
 
@@ -44,10 +44,10 @@ module frame_assembly(input wire clk, // 6.144 MHZ clock
     logic logicalin; // the bit to be sent in BMC encoding over two clock cycles
     logic newdatain; 
     logic biphaseout; // dout in biphase-mark encoding 
-    biphase mybiphase(.logicalin(logicalin), .newdatain(newdatain), .previousbit(previousbit), .biphaseout(biphaseout));
+    biphase mybiphase(.logicalin(logicalin), .newdatain(newdatain), .previousbit(previousbit), .biphaseout(biphaseout));   
 
     always_ff@(posedge clk) begin
-        if (rst || !fifo_ready) begin
+        if (rst) begin //fifo ready logic was taken out there
             previousbit <= 0;  
             frame_counter <= 0; 
             subframestate <= PREAMBLE;
@@ -65,17 +65,20 @@ module frame_assembly(input wire clk, // 6.144 MHZ clock
             parity_counter <= 1; 
             preamblestate <= START0;
             evenparitytracker <= 0; // check if this parity counter is working properly
+            count <= 0;
         end else begin
             if (fifo_ready) begin 
                 case(subframestate) 
                     PREAMBLE: // require framenumber and channel 
                     begin 
+                        
                         parity_counter <= 1; // FULL LOOP 
 
                         if (channel_state == CHANNEL_A) begin
                             preamble_counter <= preamble_counter + 1;
                             if (preamble_counter == 0) begin 
                                 frame_ready <= 1; // POTENTIAL ERROR THAT FRAME IS NOT SEEN BY FIFO  we assume that for 8 cycles we will get back the data this is asking data from the FIFO                                 
+                                count <= count + 1;
                                 if(frame_counter == 0) begin // this is the logic for the start bit 
                                     if (previousbit == 0)  begin 
                                         preamblestate <= START0;  
@@ -258,3 +261,8 @@ module frame_assembly(input wire clk, // 6.144 MHZ clock
 endmodule
 
 `default_nettype wire
+
+// todo NEED PREVIOUS BIT BEING SET FOR EVERYTHING AFTER PREAMBLE AND NEED DOUT TO GO TO BIPHASE OUT. 
+// FOR PARITY WE NEED IT TO SEND OUT ONE BIT OF THE NEXT PREAMBLE 
+// ALSO FOR PARITY STATE MACHINE WE NEED TO WE NEED THE LOGIC TO DECIDED WHICH OF THE PREAMBLE STATE WE CHOOSE IMMEDIATELY AS WELL. 
+// wE ALSO NEED to have the channel 192 bits for channel // Eric will do this. 

@@ -71,7 +71,9 @@ module sd_state_machine(input wire clk_25mhz,
                     rd <= 1'b0;
                     data_valid <= 1'b0;
                     done <= 1'b0;
-                    if (read_signal) state <= WAIT;
+                    if (read_signal) begin
+                        state <= WAIT;
+                    end
                 end
                 WAIT: begin
                     if(ready) begin //Wait for SD ready signal to begin read

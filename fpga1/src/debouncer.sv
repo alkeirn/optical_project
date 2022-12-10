@@ -21,7 +21,7 @@ module debouncer #(parameter CLK_PERIOD_NS = 10,
   always_ff @(posedge clk_in) begin: MAINDEBOUNCE
     if (rst_in) begin
       counter <= 0;
-      clean_out <= dirty_in;
+      clean_out <= 1'b0;
     end else begin
       if (dirty_in != old_dirty_in) begin
         counter <= 0;

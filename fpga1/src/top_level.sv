@@ -30,7 +30,7 @@ module top_level(input wire clk_100mhz,
 
     //Sd values
     parameter [31:0] song0_addr_start = 0;
-    parameter [31:0] song0_addr_end = 'd20408000; //change later
+    parameter [31:0] song0_addr_end = 'd14060960; 
     parameter [31:0] song1_addr_start = 1; //change later
     parameter [31:0] song1_addr_end = 0;
     parameter [31:0] song2_addr_start = 2; //change later
@@ -56,7 +56,7 @@ module top_level(input wire clk_100mhz,
     logic down_button; //down a song in the menu (vga)
     logic prev_up_button; //used to make sure only one input is read
     logic prev_down_button; //used to make sure only one input is read
-    logic prev_frame_ready; //keep track of frame read to find rising edge
+    logic prev_frame_ready; //keep track of frame ready to find rising edge
     logic sd_busy = 1'b0; //used to track if the sd card is currently pulling a block
 
 
@@ -80,9 +80,10 @@ module top_level(input wire clk_100mhz,
     logic [8:0] dinb;
 
     //clk crossing state machines
-    logic [19:0] crossed_dout;
+    logic [7:0] crossed_dout;
     logic crossed_data_valid;
     logic crossed_fifo_ready;
+    logic crossed_frame_ready;
 
     //Debouncers for selection buttons
     debouncer btnc_db(.clk_in(clk_25mhz),
@@ -119,7 +120,7 @@ module top_level(input wire clk_100mhz,
 
     seven_segment_controller sev(.clk_in(clk_buff_100mhz),
                                 .rst_in(rst),
-                                .val_in({sd_data_out}),
+                                .val_in(fifo_dout),
                                 .cat_out({cg, cf, ce, cd, cc, cb, ca}),
                                 .an_out(an));
 
@@ -128,41 +129,36 @@ module top_level(input wire clk_100mhz,
                          .clk(clk_25mhz), .srst(rst), .prog_empty(empty_512));
 
     //clock crossing modules
-    clk_cross_top tp(.clk_25mhz(clk_25mhz),
-                     .rst(rst),
-                     .fifo_din(fifo_dout), //bytes from the fifo
-                     .bram_douta(douta), //9 bit bata from the bram
-                     .fifo_ready(fifo_ready), //fifo ready signal from top level state machine. High means data in fifo
-                     
-                     .bram_addra(addra), //address of bram to read/write to
-                     .bram_dina(dina), //data into the bram for writes
-                     .bram_wea(wea), //bram write enable
-                     .rd_en(rd_en));
-
-    clk_cross_transmit tr(.clk_6144mhz(clk_6144mhz),
-                          .rst(rst),
-                          .bram_doutb(doutb), //9 bit bata from the bram
-                          .frame_ready(frame_ready), //High when requesting new data
-                          
-                          .bram_web(web), //write/read enable
-                          .bram_addrb(addrb), //address for read/write in bram
-                          .bram_dinb(dinb), //data written into bram
-                          .fifo_ready(crossed_fifo_ready), //signal for valid data coming down the line
-                          .data_out(crossed_dout),
-                          .new_data_valid(crossed_data_valid));
-                          
-    blk_mem_gen_0 bmg(.clka(clk_25mhz), .wea(wea), .addra(addra),
-                      .dina(dina), .douta(douta), .clkb(clk_6144mhz),
-                      .web(web), .addrb(addrb), .dinb(dinb), .doutb(doutb)); 
+    //fifo_ready from top to transmit
+    blk_mem_gen_0 bmg_fifo_ready(.clka(clk_25mhz), .wea(1'b1), .addra(1'b0),
+                      .dina(fifo_ready), .clkb(clk_6144mhz),
+                      .web(1'b0), .addrb(1'b0), .dinb(1'b0), .doutb(crossed_fifo_ready)); 
                       
-    //ila_0 ila(.clk(clk_buff_100mhz), .probe0(rd_en), .probe1(crossed_fifo_ready), .probe2(state), .probe3(dina));
+    //frame_ready to rd_en for fifo
+    blk_mem_gen_0 bmg_frame_ready(.clka(clk_6144mhz), .wea(1'b1), .addra(1'b0),
+                      .dina(frame_ready), .clkb(clk_25mhz),
+                      .web(1'b0), .addrb(1'b0), .dinb(1'b0), .doutb(crossed_frame_ready)); 
+                          
+    //data from fifo to transmit module
+    blk_mem_gen_2 bmg_fifo_dout(.clka(clk_25mhz), .wea(1'b1), .addra(1'b0),
+                      .dina(fifo_dout), .clkb(clk_6144mhz),
+                      .web(1'b0), .addrb(1'b0), .dinb(8'b0000_0000), .doutb(crossed_dout)); 
+   
+    //blk mem for ila                  
+    //blk_mem_gen_1 bmg_debug(.clka(clk_6144mhz), .wea(1'b1), .addra(1'b1),
+    //                  .dina(dout), .clkb(clk_25mhz),
+    //                  .web(1'b0), .addrb(1'b1), .dinb(1'b0), .doutb(probe_sig)); 
+                      
+    logic probe_sig;
+                      
+    //ila_0 ila(.clk(clk_25mhz), .probe0(rd_en), .probe1(probe_sig), .probe2(fifo_dout));
 
     // frame assembly
     logic dout; //transmitted data
     logic frame_ready; //acts as a read enable for the fifo
     assign ja = {dout, dout, dout, dout, dout, dout, dout, dout};
 
-    frame_assembly transmission(.clk(clk_6144mhz), .rst(rst), .din(crossed_dout), .fifo_ready(crossed_fifo_ready), .dout(dout), .frame_ready(frame_ready));
+    frame_assembly transmission(.clk(clk_6144mhz), .rst(rst), .din({ 6'b00_00_00,  crossed_dout[0], crossed_dout[1], crossed_dout[2], crossed_dout[3], crossed_dout[4], crossed_dout[5], crossed_dout[6],crossed_dout[7], 6'b00_00_00}), .fifo_ready(crossed_fifo_ready), .dout(dout), .frame_ready(frame_ready), .count(led[15:4]));
   
     // COMBINATIONAL LOGIC
     assign rst = btnr; 
@@ -171,9 +167,10 @@ module top_level(input wire clk_100mhz,
 
     //set up the write signals for FIFOs. 
     assign wr_en = sd_data_valid & !full; //if it's not full, there's valid sd data, write
+    assign rd_en = crossed_frame_ready & !prev_frame_ready; //look for rising edge requesting new data
     
     always_ff @(posedge clk_25mhz) begin
-        prev_frame_ready <= frame_ready; //to account for slower transmit clock cycle look for rising edge
+        prev_frame_ready <= crossed_frame_ready; //to account for slower transmit clock cycle look for rising edge
         prev_up_button <= up_button;
         prev_down_button <= down_button;
 
@@ -184,12 +181,13 @@ module top_level(input wire clk_100mhz,
             fifo_ready <= 1'b0;
             prev_frame_ready <= 0;
             sd_busy <= 1'b0;
+            current_addr <= song0_addr_start;
+            end_addr <= song0_addr_end; 
         end else begin
             case(state)
                 WAIT: begin
                     if(select_song) begin
                         state <= FIRST_BLOCK;
-                        read_signal <= 1'b1;
 
                         //Select the correct addresses
                         case(song_num)
@@ -214,6 +212,8 @@ module top_level(input wire clk_100mhz,
                                 end_addr <= song0_addr_end; 
                             end
                         endcase
+                        
+                        read_signal <= 1'b1;
 
                     //Display goes to playing screen
                     end else if(up_button & !prev_up_button) begin
@@ -229,7 +229,7 @@ module top_level(input wire clk_100mhz,
 
                     if(sd_done) begin //done loading a block, ready for transmit
                         fifo_ready <= 1'b1;
-                        current_addr <= current_addr + 4096;
+                        current_addr <= current_addr + 'd512;
                         state <= TRANSMIT;
                     end 
                 end
@@ -244,7 +244,7 @@ module top_level(input wire clk_100mhz,
                         end else if(sd_done) begin //SD finished, change busy flag to allow for next cycle
                             sd_busy <= 1'b0;
                             read_signal <= 1'b0;
-                            current_addr <= current_addr + 4096;
+                            current_addr <= current_addr + 'd512;
                         end else begin //No space, or sd is busy writing. 
                             read_signal <= 1'b0;
                         end  
@@ -257,8 +257,8 @@ module top_level(input wire clk_100mhz,
                     end
                 end
             endcase
-        end
-    end
+        end 
+    end 
 
 endmodule
 
