@@ -16,8 +16,14 @@ read_verilog -sv [ glob ./src/*.sv ]
 # uncomment line below if verilog files present:
 read_verilog  [ glob ./src/*.v ]
 read_xdc ./xdc/top_level.xdc
+# read_mem [ glob ./data/*.mem ]
 
 set_part $partNum
+
+#read_ip [ glob ./ip/*xci ]
+read_ip ./ip/blk_mem_gen_0/blk_mem_gen_0.xci
+generate_target all [get_ips]
+synth_ip [get_ips]
 
 #Run Synthesis
 synth_design -top top_level -part $partNum -verbose

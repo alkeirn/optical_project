@@ -170,6 +170,8 @@ module frame_dismantle (input wire clk,
 
                     default: begin end
                 endcase
+            end else if (axiiv_crc) begin
+                axiiv_crc <= 0;  // we need this check cuz otherwise the crc would receive bits for two clock cycles
             end
         end
     end
