@@ -9,7 +9,7 @@
 
 module vga_display (
     input  wire clk_pix,     // 75.25 MHz clock
-    input  wire btnc,    // reset button (active low)
+    input  wire btnr,    // reset button (active low)
     input  wire btnd,    // down button
     input  wire btnu,    // up button
     input  wire [63:0] titles [2:0],
@@ -21,7 +21,7 @@ module vga_display (
     );
 
     // generate pixel clock
-    logic rst_pix = btnc;  // reset button; turns the screen black
+    logic rst_pix = btnr;  // reset button; turns the screen black
 
     // display sync signals and coordinates
     localparam CORDW = 16;
@@ -243,26 +243,36 @@ module vga_display (
 
     // VGA output
     logic [1:0] idx;
+    logic btnd_prev;
+    logic btnu_prev;
     always_ff @(posedge clk_pix) begin
         if (rst_pix) begin
-            idx <= 2'b00;
+            idx <= 0;
+            btnd_prev <= 0;
+            btnu_prev <= 0;
         end else begin
-            if (btnd) begin
+            if (btnd && !btnd_prev) begin
+                btnd_prev <= 1;
                 case(idx)
-                    0: idx <= 2'b11;
-                    1: idx <= 2'b00;
-                    2: idx <= 2'b01;
+                    0: idx <= 2;
+                    1: idx <= 0;
+                    2: idx <= 1;
                     default: begin 
                     end
                 endcase
-            end else if (btnu) begin
+            end else if (!btnd && btnd_prev) begin
+                btnd_prev <= 0;
+            end else if (btnu && !btnu_prev) begin
+                btnu_prev <= 1;
                 case(idx)
-                    0: idx <= 2'b01;
-                    1: idx <= 2'b11;
-                    2: idx <= 2'b00;
+                    0: idx <= 1;
+                    1: idx <= 2;
+                    2: idx <= 0;
                     default: begin 
                     end
                 endcase
+            end else if (!btnu && btnu_prev) begin
+                btnu_prev <= 0;
             end
         end
         vga_hs <= hsync;

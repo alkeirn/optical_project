@@ -13,24 +13,19 @@ module top_level(input wire clk_100mhz,
     logic rst;            
     assign rst = btnc;
 
+    // CLOCK GENERATION
     logic clk_60mhz;
     logic clk_6144mhz;
     logic clk_buff_100mhz;
     clk_wiz_2_clk_wiz receiver_spdif_clock(.clk_in1(clk_100mhz), .clk_out1(clk_6144mhz), .clk_out2(clk_60mhz), .clk_out3(clk_buff_100mhz));
     assign ja = {clk_6144mhz, clk_6144mhz, clk_6144mhz, clk_6144mhz, clk_6144mhz, clk_6144mhz, clk_6144mhz, clk_6144mhz};
 
+    // HARDWARE RECEIVER
     logic rec_dout;
     logic rec_vout;
     hardware_receiver our_receiver(.clk(clk_60mhz), .rst(btnc), .din(jcinput), .dout(rec_dout), .vout(rec_vout));
 
-    logic [7:0] sv_data; // for debugging
-    seven_segment_controller sev(.clk_in(clk_buff_100mhz),
-                                .rst_in(rst),
-                                .val_in(val_in),
-                                .cat_out({cg, cf, ce, cd, cc, cb, ca}),
-                                .an_out(an));
-
-    // BRAM copy the one from the new top_level.sv from fpga1
+    // CLOCK-DOMAIN CROSSING ISSUE SOLVED USING BRAMS
     logic crossed_rec_dout;
     logic crossed_rec_vout;
     blk_mem_gen_0 bmg_dout(.clka(clk_60mhz), .wea(1'b1), .addra(1'b0),
@@ -41,12 +36,14 @@ module top_level(input wire clk_100mhz,
                       .dina(rec_vout), .clkb(clk_6144mhz),
                       .web(1'b0), .addrb(1'b0), .dinb(1'b0), .doutb(crossed_rec_vout)); 
 
+    // BIPHASEMARK-DECODER
     logic bmc_dout;
     logic bmc_vout;
     logic [7:0] bmc_frame_counter;
     logic in_channel;
     biphasemark_decode my_biphasemark_decode(.clk(clk_6144mhz), .rst(rst), .vin(crossed_rec_vout), .din(crossed_rec_dout), .dout(bmc_dout), .vout(bmc_vout), .frame_counter(bmc_frame_counter), .channel(in_channel));
     
+    // FRAME DISMANTLE
     logic out_channel;
     logic [19:0] dout;
     logic vout;
@@ -61,15 +58,19 @@ module top_level(input wire clk_100mhz,
                                     .dout(dout), .vout(vout), .dauxout(dauxout), .vauxout(vauxout), .channeldout(channeldout),
                                     .channelvout(channelvout), .done(done), .kill(kill));
 
-    // logic cacout;
-    // logic shitout;
-    // blk_mem_gen_0 alo(.clka(clk_6144mhz), .wea(1'b1), .addra(1'b0),
-    //                   .dina(dout), .clkb(clk_100mhz),
-    //                   .web(1'b0), .addrb(1'b0), .dinb(1'b0), .doutb(cacout)); 
-    // blk_mem_gen_0 apo(.clka(clk_6144mhz), .wea(1'b1), .addra(1'b0),
-    //                   .dina(vout), .clkb(clk_100mhz),
-    //                   .web(1'b0), .addrb(1'b0), .dinb(1'b0), .doutb(shitout)); 
+    // SEVEN SEGMENT CONTROLLER TO OBSERVE THE DATA FROM DOUT/CRC
+    logic [7:0] sv_data; // for debugging
+    seven_segment_controller sev(.clk_in(clk_buff_100mhz),
+                                .rst_in(rst),
+                                .val_in(val_in),
+                                .cat_out({cg, cf, ce, cd, cc, cb, ca}),
+                                .an_out(an));
 
+    // fifo_generator_0 fif0(.full(full), .din(sd_data_out), .wr_en(wr_en), 
+    //                      .empty(empty), .dout(fifo_dout), .rd_en(rd_en), 
+    //                      .clk(clk_25mhz), .srst(rst), .prog_empty(empty_512));
+
+    // FUNCTIONING OF THE SEVEN
     logic [31:0] val_in;
     always_ff@(posedge clk_buff_100mhz) begin
         if (rst) begin
@@ -81,10 +82,6 @@ module top_level(input wire clk_100mhz,
         end
     end
 
-    // fifo fpga2_fifo();
-    // convolution fpga2_convolution();
-    // frame_assemble fpga2_transmitter();
-    // pwm????
     
 endmodule
 
