@@ -99,7 +99,17 @@ module top_level(input wire clk_100mhz,
     debouncer btnd_db(.clk_in(clk_25mhz),
                   .rst_in(rst),
                   .dirty_in(btnd),
-                  .clean_out(down_button));              
+                  .clean_out(down_button)); 
+
+    // VGA DISPLAY:
+    /*
+    * Requires 75.25MHz clock.
+    * Input: three 80-bit/10-byte titles (e.g. [79:0] titles [2:0])
+    * Displays the ten letters to the screen; buttons are used to alternate between titles
+    * Requires the submodules
+    */
+    // vga_display hello(.clk_pix(clk_75mhz), .btnr(btnr), .titles(our_titles), .btnu(up_button), .btnd(down_button), 
+    //               .vga_hs(vga_hs), .vga_vs(vga_vs), .vga_r(vga_r), .vga_g(vga_g), .vga_b(vga_b));             
 
     sd_state_machine ss(.clk_25mhz(clk_25mhz),
                     .sd_cd(sd_cd),

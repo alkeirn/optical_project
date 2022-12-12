@@ -12,7 +12,7 @@ module vga_display (
     input  wire btnr,    // reset button (active low)
     input  wire btnd,    // down button
     input  wire btnu,    // up button
-    input  wire [63:0] titles [2:0],
+    input  wire [79:0] titles [2:0],
     output      logic vga_hs,    // horizontal sync
     output      logic vga_vs,    // vertical sync
     output      logic [3:0] vga_r,  // 4-bit VGA red
@@ -61,88 +61,132 @@ module vga_display (
 
 
     // sprites
-    localparam SPR_CNT = 8;      // number of sprites
+    localparam SPR_CNT = 14;      // number of sprites
     localparam SPR_SCALE_X = 8;  // enlarge sprite width by this factor
     localparam SPR_SCALE_Y = 8;  // enlarge sprite height by this factor
     localparam SPR_DMA = 0 - 2*SPR_CNT;  // start sprite DMA in h-blanking
 
     // horizontal and vertical screen position of letters
     logic signed [CORDW-1:0] spr_x [SPR_CNT];
-    logic signed [CORDW-1:0] spr_y;
+    logic signed [CORDW-1:0] spr_y [2];
     initial begin
-        spr_x[0] = 114;
-        spr_x[1] = 178;
-        spr_x[2] = 242;
-        spr_x[3] = 306;
-        spr_x[4] = 370;
-        spr_x[5] = 434;
-        spr_x[6] = 498;
-        spr_x[7] = 562;
-        spr_y    = 352;
+        spr_x[0] = 204;
+        spr_x[1] = 268;
+        spr_x[2] = 332;
+        spr_x[3] = 396;
+        spr_x[4] = 460;
+        spr_x[5] = 524;
+        spr_x[6] = 588;
+        spr_x[7] = 652;
+        spr_x[8] = 716;
+        spr_x[9] = 780;
+        spr_x[10] = 844;
+        spr_x[11] = 908;
+        spr_x[12] = 972;
+        spr_x[13] = 1036;
+
+        spr_y[0] = 12;
+        spr_y[1] = 352;
     end
 
     // signal to start sprite drawing
+    localparam LINE2 = 100;
     logic spr_start;
-    always_comb spr_start = (line && sy == spr_y);
+    always_comb begin
+        spr_start = (sy < LINE2) ? (line && sy == spr_y[0]) :
+                                   (line && sy == spr_y[1]);
+    end
 
     // subtract 0x20 from code points as font starts at U+0020
     logic [$clog2(F_ROM_DEPTH)-1:0] spr_cp_norm [SPR_CNT];
     always_comb begin
         case(idx)
             0: begin 
-                spr_cp_norm[0] = titles[0][7:0] - 'h20;  // H U+0048
-                spr_cp_norm[1] = titles[0][15:8] - 'h20;  // H U+0048
-                spr_cp_norm[2] = titles[0][23:16] - 'h20;  // E U+0045
-                spr_cp_norm[3] = titles[0][31:24] - 'h20;  // L U+004C
-                spr_cp_norm[4] = titles[0][39:32] - 'h20;  // L U+004C
-                spr_cp_norm[5] = titles[0][47:40] - 'h20;  // O U+004F
-                spr_cp_norm[6] = titles[0][55:48] - 'h20;  // H U+0048
-                spr_cp_norm[7] = titles[0][63:56] - 'h20;  // H U+0048
+                spr_cp_norm[13] = 'h00;  // E U+0045
+                spr_cp_norm[12] = 'h00;  // L U+004C
+                spr_cp_norm[11] = titles[0][7:0] - 'h20;  // H U+0048
+                spr_cp_norm[10] = titles[0][15:8] - 'h20;  // H U+0048
+                spr_cp_norm[9] = titles[0][23:16] - 'h20;  // E U+0045
+                spr_cp_norm[8] = titles[0][31:24] - 'h20;  // L U+004C
+                spr_cp_norm[7] = titles[0][39:32] - 'h20;  // L U+004C
+                spr_cp_norm[6] = titles[0][47:40] - 'h20;  // O U+004F
+                spr_cp_norm[5] = titles[0][55:48] - 'h20;  // H U+0048
+                spr_cp_norm[4] = titles[0][63:56] - 'h20;  // H U+0048
+                spr_cp_norm[3] = titles[0][71:64] - 'h20;  // H U+0048
+                spr_cp_norm[2] = titles[0][79:72] - 'h20;  // H U+0048
+                spr_cp_norm[1] = 'h00;  // L U+004C
+                spr_cp_norm[0] = 'h00;  // O U+004F
+
             end
             1: begin 
-                spr_cp_norm[0] = titles[1][7:0] - 'h20;  // H U+0048
-                spr_cp_norm[1] = titles[1][15:8] - 'h20;  // H U+0048
-                spr_cp_norm[2] = titles[1][23:16] - 'h20;  // E U+0045
-                spr_cp_norm[3] = titles[1][31:24] - 'h20;  // L U+004C
-                spr_cp_norm[4] = titles[1][39:32] - 'h20;  // L U+004C
-                spr_cp_norm[5] = titles[1][47:40] - 'h20;  // O U+004F
-                spr_cp_norm[6] = titles[1][55:48] - 'h20;  // H U+0048
-                spr_cp_norm[7] = titles[1][63:56] - 'h20;  // H U+0048
+                spr_cp_norm[13] = 'h00;  // E U+0045
+                spr_cp_norm[12] = 'h00;  // L U+004C
+                spr_cp_norm[11] = titles[1][7:0] - 'h20;  // H U+0048
+                spr_cp_norm[10] = titles[1][15:8] - 'h20;  // H U+0048
+                spr_cp_norm[9] = titles[1][23:16] - 'h20;  // E U+0045
+                spr_cp_norm[8] = titles[1][31:24] - 'h20;  // L U+004C
+                spr_cp_norm[7] = titles[1][39:32] - 'h20;  // L U+004C
+                spr_cp_norm[6] = titles[1][47:40] - 'h20;  // O U+004F
+                spr_cp_norm[5] = titles[1][55:48] - 'h20;  // H U+0048
+                spr_cp_norm[4] = titles[1][63:56] - 'h20;  // H U+0048
+                spr_cp_norm[3] = titles[1][71:64] - 'h20;  // H U+0048
+                spr_cp_norm[2] = titles[1][79:72] - 'h20;  // H U+0048
+                spr_cp_norm[1] = 'h00;  // L U+004C
+                spr_cp_norm[0] = 'h00;  // O U+004F
             end
             2: begin 
-                spr_cp_norm[0] = titles[2][7:0] - 'h20;  // H U+0048
-                spr_cp_norm[1] = titles[2][15:8] - 'h20;  // H U+0048
-                spr_cp_norm[2] = titles[2][23:16] - 'h20;  // E U+0045
-                spr_cp_norm[3] = titles[2][31:24] - 'h20;  // L U+004C
-                spr_cp_norm[4] = titles[2][39:32] - 'h20;  // L U+004C
-                spr_cp_norm[5] = titles[2][47:40] - 'h20;  // O U+004F
-                spr_cp_norm[6] = titles[2][55:48] - 'h20;  // H U+0048
-                spr_cp_norm[7] = titles[2][63:56] - 'h20;  // H U+0048
+                spr_cp_norm[13] = 'h00;  // E U+0045
+                spr_cp_norm[12] = 'h00;  // L U+004C
+                spr_cp_norm[11] = titles[2][7:0] - 'h20;  // H U+0048
+                spr_cp_norm[10] = titles[2][15:8] - 'h20;  // H U+0048
+                spr_cp_norm[9] = titles[2][23:16] - 'h20;  // E U+0045
+                spr_cp_norm[8] = titles[2][31:24] - 'h20;  // L U+004C
+                spr_cp_norm[7] = titles[2][39:32] - 'h20;  // L U+004C
+                spr_cp_norm[6] = titles[2][47:40] - 'h20;  // O U+004F
+                spr_cp_norm[5] = titles[2][55:48] - 'h20;  // H U+0048
+                spr_cp_norm[4] = titles[2][63:56] - 'h20;  // H U+0048
+                spr_cp_norm[3] = titles[2][71:64] - 'h20;  // H U+0048
+                spr_cp_norm[2] = titles[2][79:72] - 'h20;  // H U+0048
+                spr_cp_norm[1] = 'h00;  // L U+004C
+                spr_cp_norm[0] = 'h00;  // O U+004F
             end
             default: begin 
-                spr_cp_norm[0] = 'h0E;  // H U+0048
-                spr_cp_norm[1] = 'h28;  // H U+0048
-                spr_cp_norm[2] = 'h25;  // E U+0045
-                spr_cp_norm[3] = 'h2C;  // L U+004C
-                spr_cp_norm[4] = 'h2C;  // L U+004C
-                spr_cp_norm[5] = 'h2F;  // O U+004F
-                spr_cp_norm[6] = 'h0E;  // H U+0048
-                spr_cp_norm[7] = 'h0E;  // H U+0048
             end
         endcase
     end
 
-    integer i;  // for looping over sprite signals
+    // subtract 0x20 from code points as font starts at U+0020
+    logic [$clog2(F_ROM_DEPTH)-1:0] spr_title [SPR_CNT];
+    initial begin
+        spr_title[0] = 'h23;  // C U+0043  
+        spr_title[1] = 'h28;  // H U+0048
+        spr_title[2] = 'h2F;  // O U+004F
+        spr_title[3] = 'h2F;  // O U+004F
+        spr_title[4] = 'h33;   // S U+0053
+        spr_title[5] = 'h25;   // E U+0045
+        spr_title[6] = 'h00;   //   U+0020
+        spr_title[7] = 'h21;   // A U+0041
+        spr_title[8] = 'h00;   //   U+0020
+        spr_title[9] = 'h33;   // S U+0053
+        spr_title[10] = 'h2F;   // O U+004F
+        spr_title[11] = 'h2E;   // N U+004E
+        spr_title[12] = 'h27;   // G U+0047
+        spr_title[13] = 'h01;   // ! U+0021
+    end
 
+    integer i;  // for looping over sprite signals
+    integer j;
     // font ROM address
+    logic [$clog2(F_ROM_DEPTH)-1:0] spr_glyph_addr [SPR_CNT];
     logic [$clog2(FONT_HEIGHT)-1:0] spr_glyph_line [SPR_CNT];
     logic [SPR_CNT-1:0] spr_fdma;  // font ROM DMA slots
     always_comb begin
         font_rom_addr = 0;
         for (i = 0; i < SPR_CNT; i = i + 1) begin
-            spr_fdma[i] = (sx == SPR_DMA + i);  // DMA in blanking
+            spr_fdma[i] = (sx == SPR_DMA + i + 2);  // DMA in blanking
+            spr_glyph_addr[i] = (sy >= LINE2) ? (spr_cp_norm[i]) * FONT_HEIGHT : (spr_title[i]) * FONT_HEIGHT;
             if (spr_fdma[i])
-                font_rom_addr = FONT_HEIGHT*spr_cp_norm[i] + spr_glyph_line[i];
+                font_rom_addr = spr_glyph_addr[i] + spr_glyph_line[i];
         end
     end
 
