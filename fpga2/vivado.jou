@@ -2,12 +2,72 @@
 # Vivado v2022.1 (64-bit)
 # SW Build 3526262 on Mon Apr 18 15:48:16 MDT 2022
 # IP Build 3524634 on Mon Apr 18 20:55:01 MDT 2022
-# Start of session at: Sun Dec 11 18:02:30 2022
-# Process ID: 7008
+# Start of session at: Sun Dec 11 19:45:42 2022
+# Process ID: 15408
 # Current directory: C:/Users/Louis Martinez/Documents/MIT/Fall 2022/6.205/project/optical_project/fpga2
-# Command line: vivado.exe -mode batch -source build.tcl
+# Command line: vivado.exe
 # Log file: C:/Users/Louis Martinez/Documents/MIT/Fall 2022/6.205/project/optical_project/fpga2/vivado.log
 # Journal file: C:/Users/Louis Martinez/Documents/MIT/Fall 2022/6.205/project/optical_project/fpga2\vivado.jou
 # Running On: LAPTOP-RUL95I59, OS: Windows, CPU Frequency: 1498 MHz, CPU Physical cores: 4, Host memory: 16946 MB
 #-----------------------------------------------------------
-source build.tcl
+start_gui
+open_project {C:/Users/Louis Martinez/WHATEVER/WHATEVER.xpr}
+update_compile_order -fileset sources_1
+export_ip_user_files -of_objects  [get_files {{C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/ila_receiver/ila_receiver.xci}}] -no_script -reset -force -quiet
+remove_files  -fileset ila_receiver {{C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/ila_receiver/ila_receiver.xci}}
+file delete -force {C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/ila_receiver}
+file delete -force {c:/Users/Louis Martinez/WHATEVER/WHATEVER.gen/sources_1/ip/ila_receiver}
+export_ip_user_files -of_objects  [get_files {{C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_vga/clk_wiz_vga.xci}}] -no_script -reset -force -quiet
+remove_files  -fileset clk_wiz_vga {{C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_vga/clk_wiz_vga.xci}}
+file delete -force {C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_vga}
+file delete -force {c:/Users/Louis Martinez/WHATEVER/WHATEVER.gen/sources_1/ip/clk_wiz_vga}
+export_ip_user_files -of_objects  [get_files {{C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_receiving/clk_wiz_receiving.xci}}] -no_script -reset -force -quiet
+remove_files  -fileset clk_wiz_receiving {{C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_receiving/clk_wiz_receiving.xci}}
+file delete -force {C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_receiving}
+file delete -force {c:/Users/Louis Martinez/WHATEVER/WHATEVER.gen/sources_1/ip/clk_wiz_receiving}
+export_ip_user_files -of_objects  [get_files {{C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_receiver/clk_wiz_receiver.xci}}] -no_script -reset -force -quiet
+remove_files  -fileset clk_wiz_receiver {{C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_receiver/clk_wiz_receiver.xci}}
+file delete -force {C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_receiver}
+file delete -force {c:/Users/Louis Martinez/WHATEVER/WHATEVER.gen/sources_1/ip/clk_wiz_receiver}
+export_ip_user_files -of_objects  [get_files {{C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_6144mhz/clk_wiz_6144mhz.xci}}] -no_script -reset -force -quiet
+remove_files  -fileset clk_wiz_6144mhz {{C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_6144mhz/clk_wiz_6144mhz.xci}}
+file delete -force {C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_6144mhz}
+file delete -force {c:/Users/Louis Martinez/WHATEVER/WHATEVER.gen/sources_1/ip/clk_wiz_6144mhz}
+export_ip_user_files -of_objects  [get_files {{C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_60mhz/clk_wiz_60mhz.xci}}] -no_script -reset -force -quiet
+remove_files  -fileset clk_wiz_60mhz {{C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_60mhz/clk_wiz_60mhz.xci}}
+file delete -force {C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_60mhz}
+file delete -force {c:/Users/Louis Martinez/WHATEVER/WHATEVER.gen/sources_1/ip/clk_wiz_60mhz}
+export_ip_user_files -of_objects  [get_files {{C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_1/clk_wiz_1.xci}}] -no_script -reset -force -quiet
+remove_files  -fileset clk_wiz_1 {{C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_1/clk_wiz_1.xci}}
+file delete -force {C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_1}
+file delete -force {c:/Users/Louis Martinez/WHATEVER/WHATEVER.gen/sources_1/ip/clk_wiz_1}
+export_ip_user_files -of_objects  [get_files {{C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_0/clk_wiz_0.xci}}] -no_script -reset -force -quiet
+remove_files  -fileset clk_wiz_0 {{C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_0/clk_wiz_0.xci}}
+file delete -force {C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_0}
+file delete -force {c:/Users/Louis Martinez/WHATEVER/WHATEVER.gen/sources_1/ip/clk_wiz_0}
+export_ip_user_files -of_objects  [get_files {{C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_video/clk_wiz_video.xci}}] -no_script -reset -force -quiet
+remove_files  -fileset clk_wiz_video {{C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_video/clk_wiz_video.xci}}
+file delete -force {C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_video}
+file delete -force {c:/Users/Louis Martinez/WHATEVER/WHATEVER.gen/sources_1/ip/clk_wiz_video}
+export_ip_user_files -of_objects  [get_files {{C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_display/clk_wiz_display.xci}}] -no_script -reset -force -quiet
+remove_files  -fileset clk_wiz_display {{C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_display/clk_wiz_display.xci}}
+file delete -force {C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_display}
+file delete -force {c:/Users/Louis Martinez/WHATEVER/WHATEVER.gen/sources_1/ip/clk_wiz_display}
+export_ip_user_files -of_objects  [get_files {{C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_buffer/clk_wiz_buffer.xci}}] -no_script -reset -force -quiet
+remove_files  -fileset clk_wiz_buffer {{C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_buffer/clk_wiz_buffer.xci}}
+file delete -force {C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_buffer}
+file delete -force {c:/Users/Louis Martinez/WHATEVER/WHATEVER.gen/sources_1/ip/clk_wiz_buffer}
+export_ip_user_files -of_objects  [get_files {{C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_2/clk_wiz_2.xci}}] -no_script -reset -force -quiet
+remove_files  -fileset clk_wiz_2 {{C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_2/clk_wiz_2.xci}}
+file delete -force {C:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_2}
+file delete -force {c:/Users/Louis Martinez/WHATEVER/WHATEVER.gen/sources_1/ip/clk_wiz_2}
+create_ip -name clk_wiz -vendor xilinx.com -library ip -version 6.0 -module_name clk_wiz_receiver
+set_property -dict [list CONFIG.Component_Name {clk_wiz_receiver} CONFIG.CLKOUT2_USED {true} CONFIG.CLKOUT3_USED {true} CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {6.144} CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {60} CONFIG.CLKOUT3_REQUESTED_OUT_FREQ {100} CONFIG.USE_LOCKED {false} CONFIG.USE_RESET {false} CONFIG.MMCM_DIVCLK_DIVIDE {6} CONFIG.MMCM_CLKFBOUT_MULT_F {36.125} CONFIG.MMCM_CLKOUT0_DIVIDE_F {98.000} CONFIG.MMCM_CLKOUT1_DIVIDE {10} CONFIG.MMCM_CLKOUT2_DIVIDE {6} CONFIG.NUM_OUT_CLKS {3} CONFIG.CLKOUT1_JITTER {691.945} CONFIG.CLKOUT1_PHASE_ERROR {409.632} CONFIG.CLKOUT2_JITTER {461.992} CONFIG.CLKOUT2_PHASE_ERROR {409.632} CONFIG.CLKOUT3_JITTER {419.254} CONFIG.CLKOUT3_PHASE_ERROR {409.632}] [get_ips clk_wiz_receiver]
+generate_target {instantiation_template} [get_files {{c:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_receiver/clk_wiz_receiver.xci}}]
+generate_target all [get_files  {{c:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_receiver/clk_wiz_receiver.xci}}]
+catch { config_ip_cache -export [get_ips -all clk_wiz_receiver] }
+export_ip_user_files -of_objects [get_files {{c:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_receiver/clk_wiz_receiver.xci}}] -no_script -sync -force -quiet
+create_ip_run [get_files -of_objects [get_fileset sources_1] {{c:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_receiver/clk_wiz_receiver.xci}}]
+launch_runs clk_wiz_receiver_synth_1 -jobs 4
+wait_on_run clk_wiz_receiver_synth_1
+export_simulation -of_objects [get_files {{c:/Users/Louis Martinez/WHATEVER/WHATEVER.srcs/sources_1/ip/clk_wiz_receiver/clk_wiz_receiver.xci}}] -directory {C:/Users/Louis Martinez/WHATEVER/WHATEVER.ip_user_files/sim_scripts} -ip_user_files_dir {C:/Users/Louis Martinez/WHATEVER/WHATEVER.ip_user_files} -ipstatic_source_dir {C:/Users/Louis Martinez/WHATEVER/WHATEVER.ip_user_files/ipstatic} -lib_map_path [list {modelsim=C:/Users/Louis Martinez/WHATEVER/WHATEVER.cache/compile_simlib/modelsim} {questa=C:/Users/Louis Martinez/WHATEVER/WHATEVER.cache/compile_simlib/questa} {riviera=C:/Users/Louis Martinez/WHATEVER/WHATEVER.cache/compile_simlib/riviera} {activehdl=C:/Users/Louis Martinez/WHATEVER/WHATEVER.cache/compile_simlib/activehdl}] -use_ip_compiled_libs -force -quiet

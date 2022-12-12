@@ -15,7 +15,7 @@ module starfield #(
     input  wire logic clk,           // clock
     input  wire logic en,            // enable
     input  wire logic rst,           // reset
-    output      logic sf_on,         // star on
+    output      logic sf_on,         // star onc
     output      logic [7:0] sf_star  // star brightness
     );
 
