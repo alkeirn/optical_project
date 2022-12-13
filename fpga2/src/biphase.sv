@@ -17,15 +17,10 @@ module biphase (
 ); 
 
 always@(*) begin // Double check later if this is the symbol combination 
-    if (newdatain == 1) begin 
+    if (newdatain) begin 
         biphaseout = ~previousbit;
-    end else if (newdatain == 0) begin 
-        if (logicalin == 0) begin 
-            biphaseout = previousbit;
-        end else 
-        if (logicalin == 1) begin 
-            biphaseout = ~previousbit;
-        end 
+    end else if (!newdatain) begin 
+        biphaseout = logicalin ? ~previousbit : previousbit;
     end  
 end
 endmodule

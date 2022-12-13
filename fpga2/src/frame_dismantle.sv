@@ -53,7 +53,8 @@ module frame_dismantle (input wire clk,
     logic [2:0] channel_counter;
     logic soft_reset_i;
     // crcc crc8(.clk(clk), .rst(rst), .axiiv(axiiv_crc), .axiid(axiid_crc), .axiov(axiov_crc), .axiod(axiod_crc));
-    crc_calc #(.POLY(8'h1D), .CRC_SIZE(8), .DATA_WIDTH(8), .INIT(8'hFF), .REF_IN(1), .REF_OUT(1), .XOR_OUT(8'h0)) my_crc_calc(.clk_i(clk), .rst_i(rst), .soft_reset_i(soft_reset_i), .valid_i(axiiv_crc), .data_i(axiid_crc), .crc_o(axiod_crc));
+    logic crc_rst;
+    crc_calc #(.POLY(8'h1D), .CRC_SIZE(8), .DATA_WIDTH(8), .INIT(8'hFF), .REF_IN(1), .REF_OUT(1), .XOR_OUT(8'h0)) my_crc_calc(.clk_i(clk), .rst_i(crc_rst), .soft_reset_i(soft_reset_i), .valid_i(axiiv_crc), .data_i(axiid_crc), .crc_o(axiod_crc));
     // parity tracker  
     logic evenparitytracker;
 
@@ -77,6 +78,9 @@ module frame_dismantle (input wire clk,
                 case(subframestate)
                     AUX: 
                     begin 
+                        if (crc_rst) begin
+                            crc_rst <= 0;
+                        end
                         channel_buffer <= (frame_counter == 0 && !in_channel) ? 0 : channel_buffer;   // We must empty out the entire crc_buffer whenever we start a block
                         kill <= 0;
                         done <= 0;
@@ -159,6 +163,7 @@ module frame_dismantle (input wire clk,
 
                         if (frame_counter == 191 && in_channel) begin
                             done <= 1;
+                            crc_rst <= 1;
                             if (channel_buffer[7:0] != axiod_crc) begin
                                 kill <= 1;
                             end else begin

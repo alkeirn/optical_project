@@ -176,8 +176,9 @@ module top_level(input wire clk_100mhz,
     logic frame_ready; //acts as a read enable for the fifo
     assign ja = {dout, dout, dout, dout, dout, dout, dout, dout};
 
-    frame_assembly transmission(.clk(clk_6144mhz), .rst(rst), .din({ 6'b00_00_00,  crossed_dout[0], crossed_dout[1], crossed_dout[2], crossed_dout[3], crossed_dout[4], crossed_dout[5], crossed_dout[6],crossed_dout[7], 6'b00_00_00}), .fifo_ready(crossed_fifo_ready), .dout(dout), .frame_ready(frame_ready), .count(led[15:4]));
-  
+    // frame_assembly transmission(.clk(clk_6144mhz), .rst(rst), .din({ 6'b00_00_00,  crossed_dout[0], crossed_dout[1], crossed_dout[2], crossed_dout[3], crossed_dout[4], crossed_dout[5], crossed_dout[6],crossed_dout[7], 6'b00_00_00}), .fifo_ready(crossed_fifo_ready), .dout(dout), .frame_ready(frame_ready), .count(led[15:4]));
+    frame_assembly transmission(.clk(clk_6144mhz), .rst(rst), .din(20'hFFFFF), .fifo_ready(crossed_fifo_ready), .dout(dout), .frame_ready(frame_ready), .count(led[15:4]));
+
     // COMBINATIONAL LOGIC
     assign rst = btnr; 
     assign led[0] = up_button;

@@ -65,9 +65,11 @@ module top_level(input wire clk_100mhz,
     // RE-TRANSMISSION OF DATA USING FRAME_ASSEMBLY
     logic frame_ready;
     logic [10:0] count;
-    logic [19:0] dout;
+    logic dout;
     frame_assembly my_frame_assembler(.clk(clk_6144mhz), .rst(rst), .din({6'b0, fifo_dout, 6'b0}), .fifo_ready(!empty), 
                 .frame_ready(frame_ready), .dout(dout), .count(count));
+    // frame_assembly my_frame_assembler(.clk(clk_6144mhz), .rst(btnc), .din(20'hAAAAA), .fifo_ready(1'b1), 
+    //             .frame_ready(1'b1), .dout(dout), .count(count));
     assign ja = {dout, dout, dout, dout, dout, dout, dout, dout};
 
     // SEVEN-SEGMENT DISPLAY FOR CRC AND DEBUGGING
