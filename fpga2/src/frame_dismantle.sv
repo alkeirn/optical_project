@@ -162,7 +162,7 @@ module frame_dismantle (input wire clk,
                             if (channel_buffer[7:0] != axiod_crc) begin
                                 kill <= 1;
                             end else begin
-                                channeldout <= channel_buffer[7:0];
+                                channeldout <= channel_buffer;
                                 channelvout <= 1;
                             end
                         end

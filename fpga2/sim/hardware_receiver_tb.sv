@@ -13,7 +13,7 @@ module hardware_receiver_tb;
     logic [99:0] test2 = 100'b1111111111_1111111111_0000000001_1111111111_1111111111_0000000000_0000000000_0000000000_0001111111_1111111111;
 
     always begin
-        #10;
+        #30;
         clk = !clk;
     end
 
@@ -23,9 +23,9 @@ module hardware_receiver_tb;
         $display("Starting Sim");
         clk = 0;
         rst = 0;
-        #20;
+        #60;
         rst = 1;
-        #30;
+        #90;
         rst = 0;
 
         /*

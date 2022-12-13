@@ -31,58 +31,63 @@ module biphasemark_decode (input wire clk,
         if (rst) begin
             frame_counter <= 0;
             has_preamble_ended <= 0;
-            preamble_counter <= 0;
+            preamble_counter <= 8'bX;
+
             bmc_buffer <= 0;
-            channel <= 0;
             bmc_counter <= 0;
             data_counter <= 0;
+
+            channel <= 0;
             vout <= 0;   
         end else begin
-            if (!has_preamble_ended && vin) begin  // If we are reading the preamble
-                    preamble_buffer <= {preamble_buffer[6:0], din};
-                    data_counter <= 0; 
-                    vout <= 0; 
-                    bmc_counter <= 0; 
-                    if ({preamble_buffer[6:0], din} == START0 || {preamble_buffer[6:0], din} == START1) begin
+            if (!has_preamble_ended && vin) begin  // If we are reading the preamble and are receiving valid data
+                    preamble_buffer <= {preamble_buffer[6:0], din}; 
+                    data_counter <= 0; // we restart the data counter during the preamble
+                    vout <= 0; // we restart the valid signal during the preamble
+                    bmc_counter <= 0; // we restart the biphase mark tracker
+
+                    if ({preamble_buffer[6:0], din} == START0 || {preamble_buffer[6:0], din} == START1) begin  // If it matches a start
                         has_preamble_ended <= 1;
                         frame_counter <= 0;
                         channel <= 0;
                     end
-                    else if (({preamble_buffer[6:0], din} == LEFT0 || {preamble_buffer[6:0], din} == LEFT1)) begin
+
+                    else if (({preamble_buffer[6:0], din} == LEFT0 || {preamble_buffer[6:0], din} == LEFT1)) begin // If it matches a CHANNEL A
                         has_preamble_ended <= 1;
                         frame_counter <= frame_counter + 1;
                         channel <= 0;
                     end                      
-                    else if ({preamble_buffer[6:0], din} == RIGHT0 || {preamble_buffer[6:0], din} == RIGHT1) begin
+
+                    else if ({preamble_buffer[6:0], din} == RIGHT0 || {preamble_buffer[6:0], din} == RIGHT1) begin // If it matches a CHANNEL B
                         has_preamble_ended <= 1;    
                         channel <= 1;
                     end
-            end 
-            else if (has_preamble_ended) begin // If we want to send the decoded data
-                data_counter <= data_counter + 1;  
-                bmc_counter = ~bmc_counter;    // This is BMC counter  
+            end else if (has_preamble_ended && vin) begin // If we want to send the decoded data
+
+                data_counter <= data_counter + 1; 
+                bmc_counter <= ~bmc_counter; // this variable keeps counting to 2 so that we have enough time to receive the signal in biphase mark 
                 bmc_buffer <= {bmc_buffer[0], din}; 
-                if (bmc_counter == 1) begin  // This is equivalent to BMC counter being equal to 1. However if vout is 1 then it is valid next. 
+
+                if (bmc_counter) begin  // This is equivalent to BMC counter being equal to 1. However if vout is 1 then it is valid next. 
                     if (data_counter > 0) begin
                         vout <= 1; 
-                        if (bmc_buffer[1] == bmc_buffer[0]) begin 
+                        if (din == bmc_buffer[0]) begin // IMPORTANT: Check this later, might be causing issues
                             dout <= 1'b0;
-                        end else if (bmc_buffer[1] != bmc_buffer[0]) begin 
+                        end else if (din != bmc_buffer[0]) begin 
                             dout <= 1'b1; 
                         end 
                     end
-                end else if (bmc_counter == 0) begin 
+                end else if (!bmc_counter) begin 
                     vout <= 0; 
-                    if (data_counter == 57) begin // We stop when we reach 1 cycle more
-                        has_preamble_ended <= 0;  
-                        preamble_buffer <= {6'bX, {bmc_buffer[0], din}};  // WE PAD WITH X's to make sure that the preambles are not confused (if we pad it with zeros, we could have LEFT1 found before actually getting START0, for example)
-                    end 
                 end                
             end
-            else begin // if we have not received any valid in signal, we just reset everything to default
-                data_counter <= 0; 
+            else begin // if we have not received any valid in signal, just turn off the valid signal
+                // IMPORTANT NOTE: DO NOT RESET bmc_counter OR data_counter HERE, IT WILL MESS UP THE SENDING PROCEDURE
                 vout <= 0; 
-                bmc_counter <= 0; 
+                if (data_counter >= 56) begin // We stop when we reach 1 cycle more
+                    has_preamble_ended <= 0;  
+                    preamble_buffer <= {6'bX, {bmc_buffer[0], din}};  // WE PAD WITH X's to make sure that the preambles are not confused (if we pad it with zeros, we could have LEFT1 found before actually getting START0, for example)
+                end 
             end
         end
     end

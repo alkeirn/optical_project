@@ -5,7 +5,7 @@ module top_level(input wire clk_100mhz,
                  input wire btnc,
                  input wire jcinput,
 
-                //  output logic [7:0] ja,
+                 output logic [7:0] ja,
                  output logic ca, cb, cc, cd, ce, cf, cg,
                  output logic [7:0] an
     );
@@ -49,46 +49,45 @@ module top_level(input wire clk_100mhz,
                                     .dout(dismantle_dout), .vout(dismantle_vout), .dauxout(dauxout), .vauxout(vauxout), .channeldout(channeldout),
                                     .channelvout(channelvout), .done(done), .kill(kill));
 
-    // // // FIFO FROM THE DECODING
-    // logic full;
-    // logic wr_en;
-    // logic empty;
-    // logic fifo_dout;
-    // logic rd_en;
-    // logic empty_512;
-    // assign wr_en = !full & dismantle_vout;
-    // assign rd_en = frame_ready & !empty;
-    // fifo_generator_0 fif0(.full(full), .din(dismantle_dout[14:7]), .wr_en(wr_en), 
-    //                      .empty(empty), .dout(fifo_dout), .rd_en(rd_en), 
-    //                      .clk(clk_6144mhz), .srst(rst), .prog_empty(empty_512));
+    // FIFO FROM THE DECODING
+    logic full;
+    logic wr_en;
+    logic empty;
+    logic fifo_dout;
+    logic rd_en;
+    logic empty_512;
+    assign wr_en = !full & dismantle_vout;
+    assign rd_en = frame_ready & !empty;
+    fifo_generator_0 fif0(.full(full), .din(dismantle_dout[14:7]), .wr_en(wr_en), 
+                         .empty(empty), .dout(fifo_dout), .rd_en(rd_en), 
+                         .clk(clk_60mhz), .srst(rst), .prog_empty(empty_512));
 
-    // // RE-TRANSMISSION OF DATA USING FRAME_ASSEMBLY
-    // logic frame_ready;
-    // logic [10:0] count;
-    // logic [19:0] dout;
-    // frame_assembly my_frame_assembler(.clk(clk_6144mhz), .rst(rst), .din(dismantle_dout), .fifo_ready(!empty), 
-    //             .frame_ready(dismantle_vout), .dout(dout), .count(count));
+    // RE-TRANSMISSION OF DATA USING FRAME_ASSEMBLY
+    logic frame_ready;
+    logic [10:0] count;
+    logic [19:0] dout;
+    frame_assembly my_frame_assembler(.clk(clk_6144mhz), .rst(rst), .din({6'b0, fifo_dout, 6'b0}), .fifo_ready(!empty), 
+                .frame_ready(frame_ready), .dout(dout), .count(count));
+    assign ja = {dout, dout, dout, dout, dout, dout, dout, dout};
 
-    logic [7:0] sv_data; // for debugging
-    seven_segment_controller sev(.clk_in(clk_buff_100mhz),
+    // SEVEN-SEGMENT DISPLAY FOR CRC AND DEBUGGING
+    seven_segment_controller sev(.clk_in(clk_60mhz),
                                 .rst_in(rst),
                                 .val_in(val_in),
                                 .cat_out({cg, cf, ce, cd, cc, cb, ca}),
                                 .an_out(an));
 
-    // // FUNCTIONING OF THE SEVEN
+    // FUNCTIONING OF THE SEVEN
     logic [31:0] val_in;
-    always_ff@(posedge clk_buff_100mhz) begin
+    always_ff@(posedge clk_60mhz) begin
         if (rst) begin
             val_in <= 32'b0;
         end else begin
-            if (dismantle_vout) begin
-                val_in <= {12'b0, dismantle_dout};
+            if (done && !kill) begin
+                val_in <= channeldout[31:0];
             end
         end
     end
-
-    // assign ja = {dout, dout, dout, dout, dout, dout, dout, dout};
 endmodule
 
 `default_nettype wire
