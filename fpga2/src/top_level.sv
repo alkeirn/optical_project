@@ -26,17 +26,6 @@ module top_level(input wire clk_100mhz,
     logic rec_vout;
     hardware_receiver my_hardware_receiver(.clk(clk_60mhz), .rst(btnc), .din(jcinput), .dout(rec_dout), .vout(rec_vout));
 
-    // CLOCK-DOMAIN CROSSING FROM HARDWARE RECEIVER TO BIPHASEMARK
-    // logic crossed_rec_dout;
-    // logic crossed_rec_vout;
-    // blk_mem_gen_0 bmg_dout(.clka(clk_60mhz), .wea(1'b1), .addra(1'b0),
-    //                   .dina(rec_dout), .clkb(clk_6144mhz),
-    //                   .web(1'b0), .addrb(1'b0), .dinb(1'b0), .doutb(crossed_rec_dout)); 
-
-    // blk_mem_gen_0 bmg_vout(.clka(clk_60mhz), .wea(1'b1), .addra(1'b0),
-    //                   .dina(rec_vout), .clkb(clk_6144mhz),
-    //                   .web(1'b0), .addrb(1'b0), .dinb(1'b0), .doutb(crossed_rec_vout)); 
-
     // BIPHASEMARK-DECODER
     logic bmc_dout;
     logic bmc_vout;

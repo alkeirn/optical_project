@@ -9,7 +9,7 @@
 
 module vga_display (
     input  wire clk_pix,     // 75.25 MHz clock
-    input  wire btnr,    // reset button (active low)
+    input  wire btnc,    // reset button (active low)
     input  wire btnd,    // down button
     input  wire btnu,    // up button
     input  wire [79:0] titles [2:0],
@@ -21,7 +21,7 @@ module vga_display (
     );
 
     // generate pixel clock
-    logic rst_pix = btnr;  // reset button; turns the screen black
+    logic rst_pix = btnc;  // reset button; turns the screen black
 
     // display sync signals and coordinates
     localparam CORDW = 16;

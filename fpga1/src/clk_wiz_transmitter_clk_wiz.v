@@ -1,5 +1,5 @@
 
-// file: ak_clock.v
+// file: clk_wiz_transmitter.v
 // 
 // (c) Copyright 2008 - 2013 Xilinx, Inc. All rights reserved.
 // 
@@ -59,6 +59,7 @@
 // clk_out1__25.00000______0.000______50.0______197.790____122.577
 // clk_out2__100.00000______0.000______50.0______149.337____122.577
 // clk_out3___6.14035______0.000______50.0______260.513____122.577
+// clk_out4__77.77778______0.000______50.0______157.440____122.577
 //
 //----------------------------------------------------------------------------
 // Input Clock   Freq (MHz)    Input Jitter (UI)
@@ -67,21 +68,22 @@
 
 `timescale 1ps/1ps
 
-module clk_wiz 
+module clk_wiz_transmitter_clk_wiz 
 
  (// Clock in ports
   // Clock out ports
   output        clk_out1,
   output        clk_out2,
   output        clk_out3,
+  output        clk_out4,
   input         clk_in1
  );
   // Input buffering
   //------------------------------------
-wire clk_in1_ak_clock;
-wire clk_in2_ak_clock;
+wire clk_in1_clk_wiz_transmitter;
+wire clk_in2_clk_wiz_transmitter;
   IBUF clkin1_ibufg
-   (.O (clk_in1_ak_clock),
+   (.O (clk_in1_clk_wiz_transmitter),
     .I (clk_in1));
 
 
@@ -94,25 +96,24 @@ wire clk_in2_ak_clock;
   //    * Unused inputs are tied off
   //    * Unused outputs are labeled unused
 
-  wire        clk_out1_ak_clock;
-  wire        clk_out2_ak_clock;
-  wire        clk_out3_ak_clock;
-  wire        clk_out4_ak_clock;
-  wire        clk_out5_ak_clock;
-  wire        clk_out6_ak_clock;
-  wire        clk_out7_ak_clock;
+  wire        clk_out1_clk_wiz_transmitter;
+  wire        clk_out2_clk_wiz_transmitter;
+  wire        clk_out3_clk_wiz_transmitter;
+  wire        clk_out4_clk_wiz_transmitter;
+  wire        clk_out5_clk_wiz_transmitter;
+  wire        clk_out6_clk_wiz_transmitter;
+  wire        clk_out7_clk_wiz_transmitter;
 
   wire [15:0] do_unused;
   wire        drdy_unused;
   wire        psdone_unused;
   wire        locked_int;
-  wire        clkfbout_ak_clock;
-  wire        clkfbout_buf_ak_clock;
+  wire        clkfbout_clk_wiz_transmitter;
+  wire        clkfbout_buf_clk_wiz_transmitter;
   wire        clkfboutb_unused;
     wire clkout0b_unused;
    wire clkout1b_unused;
    wire clkout2b_unused;
-   wire clkout3_unused;
    wire clkout3b_unused;
    wire clkout4_unused;
   wire        clkout5_unused;
@@ -141,26 +142,30 @@ wire clk_in2_ak_clock;
     .CLKOUT2_PHASE        (0.000),
     .CLKOUT2_DUTY_CYCLE   (0.500),
     .CLKOUT2_USE_FINE_PS  ("FALSE"),
+    .CLKOUT3_DIVIDE       (9),
+    .CLKOUT3_PHASE        (0.000),
+    .CLKOUT3_DUTY_CYCLE   (0.500),
+    .CLKOUT3_USE_FINE_PS  ("FALSE"),
     .CLKIN1_PERIOD        (10.000))
   mmcm_adv_inst
     // Output clocks
    (
-    .CLKFBOUT            (clkfbout_ak_clock),
+    .CLKFBOUT            (clkfbout_clk_wiz_transmitter),
     .CLKFBOUTB           (clkfboutb_unused),
-    .CLKOUT0             (clk_out1_ak_clock),
+    .CLKOUT0             (clk_out1_clk_wiz_transmitter),
     .CLKOUT0B            (clkout0b_unused),
-    .CLKOUT1             (clk_out2_ak_clock),
+    .CLKOUT1             (clk_out2_clk_wiz_transmitter),
     .CLKOUT1B            (clkout1b_unused),
-    .CLKOUT2             (clk_out3_ak_clock),
+    .CLKOUT2             (clk_out3_clk_wiz_transmitter),
     .CLKOUT2B            (clkout2b_unused),
-    .CLKOUT3             (clkout3_unused),
+    .CLKOUT3             (clk_out4_clk_wiz_transmitter),
     .CLKOUT3B            (clkout3b_unused),
     .CLKOUT4             (clkout4_unused),
     .CLKOUT5             (clkout5_unused),
     .CLKOUT6             (clkout6_unused),
      // Input clock control
-    .CLKFBIN             (clkfbout_buf_ak_clock),
-    .CLKIN1              (clk_in1_ak_clock),
+    .CLKFBIN             (clkfbout_buf_clk_wiz_transmitter),
+    .CLKIN1              (clk_in1_clk_wiz_transmitter),
     .CLKIN2              (1'b0),
      // Tied to always select the primary input clock
     .CLKINSEL            (1'b1),
@@ -190,8 +195,8 @@ wire clk_in2_ak_clock;
   //-----------------------------------
 
   BUFG clkf_buf
-   (.O (clkfbout_buf_ak_clock),
-    .I (clkfbout_ak_clock));
+   (.O (clkfbout_buf_clk_wiz_transmitter),
+    .I (clkfbout_clk_wiz_transmitter));
 
 
 
@@ -200,16 +205,20 @@ wire clk_in2_ak_clock;
 
   BUFG clkout1_buf
    (.O   (clk_out1),
-    .I   (clk_out1_ak_clock));
+    .I   (clk_out1_clk_wiz_transmitter));
 
 
   BUFG clkout2_buf
    (.O   (clk_out2),
-    .I   (clk_out2_ak_clock));
+    .I   (clk_out2_clk_wiz_transmitter));
 
   BUFG clkout3_buf
    (.O   (clk_out3),
-    .I   (clk_out3_ak_clock));
+    .I   (clk_out3_clk_wiz_transmitter));
+
+  BUFG clkout4_buf
+   (.O   (clk_out4),
+    .I   (clk_out4_clk_wiz_transmitter));
 
 
 

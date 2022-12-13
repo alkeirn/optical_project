@@ -7,7 +7,7 @@ module top_level(input wire clk_100mhz,
                     input wire btnc, 
                     input wire btnu,
                     input wire btnd,
-                             
+
                     inout wire [3:0] sd_dat,
                        
                     output logic [15:0] led,
@@ -16,7 +16,12 @@ module top_level(input wire clk_100mhz,
                     output logic sd_cmd,
                     output logic ca, cb, cc, cd, ce, cf, cg,
                     output logic [7:0] an,
-                    output logic [7:0] ja
+                    output logic [7:0] ja,
+                    output logic vga_hs,    // horizontal sync
+                    output logic vga_vs,    // vertical sync
+                    output logic [3:0] vga_r,  // 4-bit VGA red
+                    output logic [3:0] vga_g,  // 4-bit VGA green
+                    output logic [3:0] vga_b   // 4-bit VGA blue
     );
     
     //FIFO values
@@ -64,9 +69,10 @@ module top_level(input wire clk_100mhz,
     logic clk_25mhz;
     logic clk_buff_100mhz;
     logic clk_6144mhz;
+    logic clk_75mhz;
 
-    // generate 25 mhz clock for sd_controller and 6.144 mhz clock for transmission 
-    clk_wiz clk_gen(.clk_in1(clk_100mhz), .clk_out1(clk_25mhz), .clk_out2(clk_buff_100mhz), .clk_out3(clk_6144mhz));
+    // generate 25 mhz clock for sd_controller and 6.144 mhz clock for transmission and 75mhz for vga
+    clk_wiz_transmitter_clk_wiz clk_gen(.clk_in1(clk_100mhz), .clk_out1(clk_25mhz), .clk_out2(clk_buff_100mhz), .clk_out3(clk_6144mhz), .clk_out4(clk_75mhz));
 
     //clk crossing variables
     //bram
@@ -108,8 +114,10 @@ module top_level(input wire clk_100mhz,
     * Displays the ten letters to the screen; buttons are used to alternate between titles
     * Requires the submodules
     */
-    // vga_display hello(.clk_pix(clk_75mhz), .btnr(btnr), .titles(our_titles), .btnu(up_button), .btnd(down_button), 
-    //               .vga_hs(vga_hs), .vga_vs(vga_vs), .vga_r(vga_r), .vga_g(vga_g), .vga_b(vga_b));             
+    logic [79:0] our_titles [2:0];
+    assign our_titles = {80'h56455350455254494E45, 80'h524144494F4845414420, 80'h504C41494E534F4E4720};
+    vga_display screen_selection_display(.clk_pix(clk_75mhz), .btnc(btnr), .titles(our_titles), .btnu(btnu), .btnd(btnd), 
+                  .vga_hs(vga_hs), .vga_vs(vga_vs), .vga_r(vga_r), .vga_g(vga_g), .vga_b(vga_b));             
 
     sd_state_machine ss(.clk_25mhz(clk_25mhz),
                     .sd_cd(sd_cd),
