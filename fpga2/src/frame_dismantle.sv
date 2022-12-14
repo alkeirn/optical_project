@@ -13,11 +13,13 @@ module frame_dismantle (input wire clk,
                    output logic vout,
                    output logic [3:0] dauxout,     // AUX-info
                    output logic vauxout, 
-                   output logic [191:0] channeldout,   // CHANNEL-info
+                   output logic [31:0] channeldout,   // CHANNEL-info
                    output logic channelvout,
                    output logic done,
                    output logic kill
     );
+
+//    ila_0 my_ila0(.clk(clk), .probe0(channel_buffer), .probe1(frame_counter), .probe2(axiod_crc));
 
     /*
     Idea:
@@ -51,7 +53,7 @@ module frame_dismantle (input wire clk,
     logic axiiv_crc;
     logic [7:0] axiid_crc;
     logic [2:0] channel_counter;
-    logic soft_reset_i;
+    logic soft_reset_i = 1'b0;
     // crcc crc8(.clk(clk), .rst(rst), .axiiv(axiiv_crc), .axiid(axiid_crc), .axiov(axiov_crc), .axiod(axiod_crc));
     logic crc_rst;
     crc_calc #(.POLY(8'h1D), .CRC_SIZE(8), .DATA_WIDTH(8), .INIT(8'hFF), .REF_IN(1), .REF_OUT(1), .XOR_OUT(8'h0)) my_crc_calc(.clk_i(clk), .rst_i(crc_rst), .soft_reset_i(soft_reset_i), .valid_i(axiiv_crc), .data_i(axiid_crc), .crc_o(axiod_crc));
@@ -70,6 +72,7 @@ module frame_dismantle (input wire clk,
             invalid <= 0;
             evenparitytracker <= 0;
             channel_counter <= 0;
+            crc_rst <= 1;
 
             kill <= 0;
             done <= 0;
@@ -167,7 +170,7 @@ module frame_dismantle (input wire clk,
                             if (channel_buffer[7:0] != axiod_crc) begin
                                 kill <= 1;
                             end else begin
-                                channeldout <= channel_buffer;
+                                channeldout <= channel_buffer[31:0];
                                 channelvout <= 1;
                             end
                         end

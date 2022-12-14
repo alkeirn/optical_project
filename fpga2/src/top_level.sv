@@ -40,7 +40,7 @@ module top_level(input wire clk_100mhz,
     logic dismantle_vout;
     logic [3:0] dauxout;
     logic vauxout;
-    logic [191:0] channeldout;
+    logic [31:0] channeldout;
     logic channelvout;
     logic done;
     logic kill;
@@ -49,29 +49,56 @@ module top_level(input wire clk_100mhz,
                                     .dout(dismantle_dout), .vout(dismantle_vout), .dauxout(dauxout), .vauxout(vauxout), .channeldout(channeldout),
                                     .channelvout(channelvout), .done(done), .kill(kill));
 
+    logic bs;
+    assign bs = dismantle_dout + 16'b1; 
+
     // FIFO FROM THE DECODING
+    logic crossed_frame_ready;  
+    logic frame_ready;
     logic full;
     logic wr_en;
     logic empty;
-    logic fifo_dout;
+    logic [7:0] fifo_dout;
     logic rd_en;
     logic empty_512;
     assign wr_en = !full & dismantle_vout;
-    assign rd_en = frame_ready & !empty;
+    assign rd_en = crossed_frame_ready & !empty;
     fifo_generator_0 fif0(.full(full), .din(dismantle_dout[14:7]), .wr_en(wr_en), 
                          .empty(empty), .dout(fifo_dout), .rd_en(rd_en), 
                          .clk(clk_60mhz), .srst(rst), .prog_empty(empty_512));
 
+    // CLOCK-DOMAIN CROSSING
+    logic [7:0] crossed_dout;
+    logic crossed_empty;
+    //fifo_ready from top to transmit
+    blk_mem_gen_0 bmg_fifo_ready(.clka(clk_60mhz), .wea(1'b1), .addra(1'b0),
+                      .dina(empty), .clkb(clk_6144mhz),
+                      .web(1'b0), .addrb(1'b0), .dinb(1'b0), .doutb(crossed_empty)); 
+                      
+    //frame_ready to rd_en for fifo
+    blk_mem_gen_0 bmg_frame_ready(.clka(clk_6144mhz), .wea(1'b1), .addra(1'b0),
+                      .dina(frame_ready), .clkb(clk_60mhz),
+                      .web(1'b0), .addrb(1'b0), .dinb(1'b0), .doutb(crossed_frame_ready)); 
+                          
+    //data from fifo to transmit module
+    blk_mem_gen_2 bmg_fifo_dout(.clka(clk_60mhz), .wea(1'b1), .addra(1'b0),
+                      .dina(fifo_dout), .clkb(clk_6144mhz),
+                      .web(1'b0), .addrb(1'b0), .dinb(8'b0000_0000), .doutb(crossed_dout)); 
+
     // RE-TRANSMISSION OF DATA USING FRAME_ASSEMBLY
-    logic frame_ready;
     logic [10:0] count;
     logic dout;
-    frame_assembly my_frame_assembler(.clk(clk_6144mhz), .rst(rst), .din({6'b0, fifo_dout, 6'b0}), .fifo_ready(!empty), 
+    frame_assembly my_frame_assembler(.clk(clk_6144mhz), .rst(rst), .din({6'b0, crossed_dout, 6'b0}), .fifo_ready(!crossed_empty), 
                 .frame_ready(frame_ready), .dout(dout), .count(count));
     // frame_assembly my_frame_assembler(.clk(clk_6144mhz), .rst(btnc), .din(20'hAAAAA), .fifo_ready(1'b1), 
     //             .frame_ready(1'b1), .dout(dout), .count(count));
     assign ja = {dout, dout, dout, dout, dout, dout, dout, dout};
+    
+//    ila_receiving my_ila(.clk(clk_60mhz), .probe0(jcinput), .probe1(rec_dout), .probe2(rec_vout), .probe3(bmc_dout), 
+//            .probe4(bmc_vout), .probe5(bmc_frame_counter), .probe6(in_channel));
 
+    // ila0 my_ila89(.clk(clk_60mhz), .probe0(jcinput), .probe1(dout), .probe2(dismantle_dout));
+            
     // SEVEN-SEGMENT DISPLAY FOR CRC AND DEBUGGING
     seven_segment_controller sev(.clk_in(clk_60mhz),
                                 .rst_in(rst),
@@ -79,15 +106,25 @@ module top_level(input wire clk_100mhz,
                                 .cat_out({cg, cf, ce, cd, cc, cb, ca}),
                                 .an_out(an));
 
-    // FUNCTIONING OF THE SEVEN
+    // FUNCTIONING OF THE SEVEN-SEGMENT DISPLAY
     logic [31:0] val_in;
+    logic lock;
     always_ff@(posedge clk_60mhz) begin
         if (rst) begin
             val_in <= 32'b0;
+            lock <= 0;
         end else begin
-            if (done && !kill) begin
-                val_in <= channeldout[31:0];
+            if (dismantle_vout) begin
+                val_in <= {12'b0, dismantle_dout};
+            end else begin
+                val_in <= 32'b0;
             end
+            // if (done && !lock) begin
+            //     val_in <= channeldout;
+            //     lock <= 1;
+            // end else begin
+            //     val_in <= 32'hABCDE123;
+            // end
         end
     end
 endmodule
