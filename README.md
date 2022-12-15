@@ -1,4 +1,4 @@
-This is the code for the 6.205 Optical Transmission via S/PDIF over TOSLINK. 
+## This is the code for the 6.205 Optical Transmission via S/PDIF over TOSLINK. 
 
 Jay and Fischer: Since we were down the the wire on the final report, we thought we'd include more evaluation information here.
 
