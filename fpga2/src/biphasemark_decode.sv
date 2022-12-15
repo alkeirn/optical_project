@@ -61,7 +61,7 @@ module biphasemark_decode (input wire clk,
                     else if (({preamble_buffer[6:0], din} == RIGHT0 || {preamble_buffer[6:0], din} == RIGHT1) && start) begin // If it matches a CHANNEL B
                         has_preamble_ended <= 1;    
                         channel <= 1;
-                        if (frame_counter == 191) begin
+                        if (frame_counter == 191) begin // we allow the frame counter to restart at the end of every 192 block
                             start <= 0;
                         end
                     end

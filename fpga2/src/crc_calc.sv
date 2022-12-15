@@ -18,6 +18,11 @@ module crc_calc #(
   output logic [CRC_SIZE - 1 : 0]   crc_o
 );
 
+/*
+* Imported CRC module that allows for checking of the CRC for arbitrarily large input values
+* and arbitrary polynomials. 
+*/
+
 logic [CRC_SIZE - 1 : 0] crc;
 logic [CRC_SIZE - 1 : 0] crc_next;
 logic [CRC_SIZE - 1 : 0] crc_prev;

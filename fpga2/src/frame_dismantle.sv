@@ -19,22 +19,6 @@ module frame_dismantle (input wire clk,
                    output logic kill
     );
 
-//    ila_0 my_ila0(.clk(clk), .probe0(channel_buffer), .probe1(frame_counter), .probe2(axiod_crc));
-
-    /*
-    Idea:
-        1. We have the following states: (REST, AUX, DATA, VALID, USER, CHANNEL, PARITY)
-        2. We have to check then, in the corresponding order: is the data valid? is the channel CRC8 valid? do we have the correct parity?
-
-    Questions:
-        1. How much data we send? We could send 20 bits of data
-        2. How do we kill the operation, when it doesn't work
-
-    NOTE: 
-        1. Send a single audio packet from the transmitter and make sure that the receiver side gets the exact same thing
-        2. Every packet interleaved with series of ones or zeroes/send succession of blocks interleaved with trash (ones or zeroes)
-    */
-
     assign out_channel = in_channel;
     // this state variable defines the current stage of the subframe
     typedef enum {AUX, DATA, VALID, USER, CHANNEL, PARITY} subframe_state;  
@@ -54,7 +38,6 @@ module frame_dismantle (input wire clk,
     logic [7:0] axiid_crc;
     logic [2:0] channel_counter;
     logic soft_reset_i = 1'b0;
-    // crcc crc8(.clk(clk), .rst(rst), .axiiv(axiiv_crc), .axiid(axiid_crc), .axiov(axiov_crc), .axiod(axiod_crc));
     logic crc_rst;
     crc_calc #(.POLY(8'h1D), .CRC_SIZE(8), .DATA_WIDTH(8), .INIT(8'hFF), .REF_IN(1), .REF_OUT(1), .XOR_OUT(8'h0)) my_crc_calc(.clk_i(clk), .rst_i(crc_rst), .soft_reset_i(soft_reset_i), .valid_i(axiiv_crc), .data_i(axiid_crc), .crc_o(axiod_crc));
     // parity tracker  
@@ -137,7 +120,7 @@ module frame_dismantle (input wire clk,
                         subframestate <= PARITY;
                         if (frame_counter <= 191 && !in_channel) begin
                             channel_buffer <= {channel_buffer[190:0], din};
-                            if (channel_counter == 7 && frame_counter <= 183) begin
+                            if (channel_counter == 7 && frame_counter <= 183) begin // we only consider up to 183 because the last 8 bits contain the CRC, which we ignore
                                 channel_counter <= 0;
                                 axiid_crc <= {channel_buffer[6:0], din};
                                 axiiv_crc <= 1;

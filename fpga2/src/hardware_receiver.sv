@@ -8,6 +8,12 @@ module hardware_receiver(input wire clk,
                 output logic dout,
                 output logic vout);
 
+    /*
+    * This module counts up to eight samples of *the same* bit
+    * If the samples turn out to be different before reaching 8 samples, we consider it trash data 
+    * and start counting again. This is our way of determining whether any bit sent at 6.144MHz is
+    * a valid bit sampling at 60MHz.
+    */
     logic [8:0] counter0;
     logic [8:0] counter1;
     always_ff@(posedge clk) begin

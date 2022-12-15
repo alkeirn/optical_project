@@ -88,121 +88,121 @@ module frame_dismantle_tb;
         *  TEST 1: Send two entire 192 blocks continuously through biphasemark_decode
         *  ---------------------------------------------------------------------------------
         */ 
-        // vin = 1;
-        // for (int i = 0; i < 384; i = i + 1) begin
-        //     if (i == 0) begin
-        //         for (int j = 0; j < 64; j = j + 1) begin
-        //             din = test3_channelZ[63 - j];
-        //             #20;
-        //         end
-        //     end else if (i % 2 == 0) begin
-        //         for (int j = 0; j < 64; j = j + 1) begin
-        //             din = test3_channelA[63 - j];
-        //             #20;
-        //         end
-        //     end else if (i % 2 == 1) begin
-        //         for (int j = 0; j < 64; j = j + 1) begin
-        //             din = test3_channelB[63 - j];
-        //             #20;
-        //         end
-        //     end
-        // end
-        // for (int i = 0; i < 384; i = i + 1) begin
-        //     if (i == 0) begin
-        //         for (int j = 0; j < 64; j = j + 1) begin
-        //             din = test3_channelZ[63 - j];
-        //             #20;
-        //         end
-        //     end else if (i % 2 == 0) begin
-        //         for (int j = 0; j < 64; j = j + 1) begin
-        //             din = test3_channelA[63 - j];
-        //             #20;
-        //         end
-        //     end else if (i % 2 == 1) begin
-        //         for (int j = 0; j < 64; j = j + 1) begin
-        //             din = test3_channelB[63 - j];
-        //             #20;
-        //         end
-        //     end
-        // end
-        // vin = 0;
-        // #400;
+        vin = 1;
+        for (int i = 0; i < 384; i = i + 1) begin
+            if (i == 0) begin
+                for (int j = 0; j < 64; j = j + 1) begin
+                    din = test3_channelZ[63 - j];
+                    #20;
+                end
+            end else if (i % 2 == 0) begin
+                for (int j = 0; j < 64; j = j + 1) begin
+                    din = test3_channelA[63 - j];
+                    #20;
+                end
+            end else if (i % 2 == 1) begin
+                for (int j = 0; j < 64; j = j + 1) begin
+                    din = test3_channelB[63 - j];
+                    #20;
+                end
+            end
+        end
+        for (int i = 0; i < 384; i = i + 1) begin
+            if (i == 0) begin
+                for (int j = 0; j < 64; j = j + 1) begin
+                    din = test3_channelZ[63 - j];
+                    #20;
+                end
+            end else if (i % 2 == 0) begin
+                for (int j = 0; j < 64; j = j + 1) begin
+                    din = test3_channelA[63 - j];
+                    #20;
+                end
+            end else if (i % 2 == 1) begin
+                for (int j = 0; j < 64; j = j + 1) begin
+                    din = test3_channelB[63 - j];
+                    #20;
+                end
+            end
+        end
+        vin = 0;
+        #400;
 
         /* ---------------------------------------------------------------
         *  TEST 2: Send data first, then trash (all 1s), then data again
         *  ---------------------------------------------------------------
         */ 
-        // vin = 1;
-        // for (int i = 0; i < 384; i = i + 1) begin
-        //     if (i == 0) begin
-        //         for (int j = 0; j < 64; j = j + 1) begin
-        //             din = test3_channelZ[63 - j];
-        //             #20;
-        //         end
-        //     end else if (i % 2 == 0) begin
-        //         for (int j = 0; j < 64; j = j + 1) begin
-        //             din = test3_channelA[63 - j];
-        //             #20;
-        //         end
-        //     end else if (i % 2 == 1) begin
-        //         for (int j = 0; j < 64; j = j + 1) begin
-        //             din = test3_channelB[63 - j];
-        //             #20;
-        //         end
-        //     end
-        // end
-        // vin = 0;
-        // #400;
+        vin = 1;
+        for (int i = 0; i < 384; i = i + 1) begin
+            if (i == 0) begin
+                for (int j = 0; j < 64; j = j + 1) begin
+                    din = test3_channelZ[63 - j];
+                    #20;
+                end
+            end else if (i % 2 == 0) begin
+                for (int j = 0; j < 64; j = j + 1) begin
+                    din = test3_channelA[63 - j];
+                    #20;
+                end
+            end else if (i % 2 == 1) begin
+                for (int j = 0; j < 64; j = j + 1) begin
+                    din = test3_channelB[63 - j];
+                    #20;
+                end
+            end
+        end
+        vin = 0;
+        #400;
 
          /* ---------------------------------------------------------------
         *  TEST 3: Getting the data from the frame_assembler directly
         *  ---------------------------------------------------------------
         */ 
-        // vin = 1;
-        // frame_din = 20'hFFFFF;
-        // #4000000;   
+        vin = 1;
+        frame_din = 20'hFFFFF;
+        #4000000;   
 
         /* ---------------------------------------------------------------
         *  TEST 4: Sends data to biphase_mark module, but it is
         *  alternated with spaces where data is just not valid
         *  ---------------------------------------------------------------
         */ 
-        // vin = 1;
-        // for (int i = 0; i < 384; i = i + 1) begin
-        //     if (i == 0) begin
-        //         for (int j = 0; j < 448; j = j + 1) begin
-        //             if (j % 7 == 0) begin
-        //                 vin = 1; 
-        //                 din = test3_channelZ[63 - (j / 7)];
-        //             end else begin
-        //                 vin = 0;
-        //             end
-        //             #20;
-        //         end
-        //     end else if (i % 2 == 0) begin
-        //         for (int j = 0; j < 320; j = j + 1) begin
-        //             if (j % 5 == 0) begin
-        //                 vin = 1; 
-        //                 din = test3_channelA[63 - (j / 5)];
-        //             end else begin
-        //                 vin = 0;
-        //             end
-        //             #20;
-        //         end
-        //     end else if (i % 2 == 1) begin
-        //         for (int j = 0; j < 256; j = j + 1) begin
-        //             if (j % 4 == 0) begin
-        //                 vin = 1; 
-        //                 din = test3_channelB[63 - (j / 4)];
-        //             end else begin
-        //                 vin = 0;
-        //             end
-        //             #20;
-        //         end
-        //     end
-        // end
-        // vin = 0;
-        // #400; 
+        vin = 1;
+        for (int i = 0; i < 384; i = i + 1) begin
+            if (i == 0) begin
+                for (int j = 0; j < 448; j = j + 1) begin
+                    if (j % 7 == 0) begin
+                        vin = 1; 
+                        din = test3_channelZ[63 - (j / 7)];
+                    end else begin
+                        vin = 0;
+                    end
+                    #20;
+                end
+            end else if (i % 2 == 0) begin
+                for (int j = 0; j < 320; j = j + 1) begin
+                    if (j % 5 == 0) begin
+                        vin = 1; 
+                        din = test3_channelA[63 - (j / 5)];
+                    end else begin
+                        vin = 0;
+                    end
+                    #20;
+                end
+            end else if (i % 2 == 1) begin
+                for (int j = 0; j < 256; j = j + 1) begin
+                    if (j % 4 == 0) begin
+                        vin = 1; 
+                        din = test3_channelB[63 - (j / 4)];
+                    end else begin
+                        vin = 0;
+                    end
+                    #20;
+                end
+            end
+        end
+        vin = 0;
+        #400; 
 
         /* ---------------------------------------------------------------
         *  TEST 5: Send data through the Frame Assembly but with a 

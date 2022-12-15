@@ -17,7 +17,7 @@ module frame_assembly(input wire clk, // 6.144 MHZ clock
     logic [2:0] preamble_counter; // this variable counts the number of preamble bits sent. Counts up to 8  
     logic [2:0] aux_counter; // this variable counts the number of aux bits sent. Counts up to 8 because 4 logical bits * 2   
     logic[5:0] data_counter; // this variable counts the number of data bits sent. Counts up to 40 because 20 logical bits * 2   
-    logic [1:0] valid_counter; // ths
+    logic [1:0] valid_counter; 
     logic [1:0] user_counter;
     logic [1:0] channel_counter; 
     logic [1:0] parity_counter; 

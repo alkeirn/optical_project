@@ -31,14 +31,14 @@ module hardware_receiver_tb;
         /*
         TEST 1: Input: 60'b1111111111_1111111111_0000000001_1111111111_1111111111_0000000000
         */
-        // for (int i = 0; i < 60; i = i + 1) begin
-        //     din = test1[59 - i];
-        //     if (vout) begin
-        //         $display(dout);
-        //     end
-        //     #20;
-        // end
-        // #400;
+        for (int i = 0; i < 60; i = i + 1) begin
+            din = test1[59 - i];
+            if (vout) begin
+                $display(dout);
+            end
+            #20;
+        end
+        #400;
 
         /*
         TEST 2: Input: 100'b1111111111_1111111111_0000000001_1111111111_1111111111_0000000000_0000000000_0000000000_0001111111_1111111111;
