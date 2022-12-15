@@ -124,7 +124,7 @@ module top_level(input wire clk_100mhz,
                 val_in <= channeldout;
                 lock <= 1;
             end else if (!lock) begin
-                val_in <= 32'b00000000_00000000_00000000_00101011;
+                val_in <= 32'b0;
             end
         end
     end
