@@ -34,22 +34,10 @@ module top_level(input wire clk_100mhz,
     logic full_512;
     logic fifo_ready;
 
-    //Sd values
-    parameter [31:0] song0_addr_start = 0;
-    parameter [31:0] song0_addr_end = 'd14060960; 
-    parameter [31:0] song1_addr_start = 1; //change later
-    parameter [31:0] song1_addr_end = 0;
-    parameter [31:0] song2_addr_start = 2; //change later
-    parameter [31:0] song2_addr_end = 0;
-    parameter [31:0] song3_addr_start = 2; //change later
-    parameter [31:0] song3_addr_end = 0;
-
     logic read_signal = 1'b0; //read a 512 byte block from sd card
     logic sd_data_valid; //valid data on the sd card putup
     logic sd_done; //Goes high when the sd card is done reading a block (for 1 clock cycle)
     logic [7:0] sd_data_out;
-    logic [31:0] current_addr = song0_addr_start;
-    logic [31:0] end_addr = song0_addr_end;
     logic [19:0] sd_byte_count;
 
     //Top level state machine
@@ -65,7 +53,6 @@ module top_level(input wire clk_100mhz,
     logic prev_frame_ready; //keep track of frame ready to find rising edge
     logic sd_busy = 1'b0; //used to track if the sd card is currently pulling a block
     logic waiting_for_data = 1'b0;
-
 
     // Clocks
     logic clk_25mhz;
@@ -116,7 +103,6 @@ module top_level(input wire clk_100mhz,
     logic [8:0] dir_bram_addr;
     logic dir_rd_en;
     logic [79:0] song_title;
-//    logic [15:0] directory_data;
     logic dir_out_valid;
 
     //clk crossing vars
@@ -142,7 +128,7 @@ module top_level(input wire clk_100mhz,
                   .dirty_in(btnd),
                   .clean_out(down_button)); 
                   
-        // VGA DISPLAY:
+    // VGA DISPLAY:
     /*
     * Requires 75.25MHz clock.
     * Input: three 80-bit/10-byte titles (e.g. [79:0] titles [2:0])
@@ -152,11 +138,8 @@ module top_level(input wire clk_100mhz,
     //replace out_titles with crossed_song_title which is 80 bits 
     logic [79:0] our_title;
     assign our_title = crossed_song_title;
-//    assign our_titles = {80'h56455350455254494E45, 80'h524144494F4845414420, 80'h504C41494E534F4E4720};
     vga_display screen_selection_display(.clk_pix(clk_75mhz), .btnc(btnr), .titles(our_title), .btnu(btnu), .btnd(btnd), 
                   .vga_hs(vga_hs), .vga_vs(vga_vs), .vga_r(vga_r), .vga_g(vga_g), .vga_b(vga_b)); 
-                  
-                 
 
     sd_state_machine ss(.clk_25mhz(clk_25mhz),
                     .sd_cd(sd_cd),
@@ -176,7 +159,7 @@ module top_level(input wire clk_100mhz,
                     .seen_flag(led[3])
                     );
                     
-    //filesystem extrator for VGA
+    //filesystem extractor for VGA
     extract_directory_data edd(.clk(clk_25mhz),
                               .rst(rst),
                               .song_start_addr(song_start_addr), //start of the 32 blocks in the directory for the song
@@ -231,7 +214,7 @@ module top_level(input wire clk_100mhz,
                    .target_byte(target_byte), //inclusive position of first byte needed 
                    .end_of_song(end_of_song),
                    .cluster_offset(cluster_offset)
-                   ); // How many bytes you want
+                   ); 
                    
     blk_mem_gen_filesystem directory_bram(.clka(clk_25mhz), .wea(bram_wr_en), .addra(bram_addr),
                       .dina(bram_data), .clkb(clk_25mhz),
@@ -265,18 +248,7 @@ module top_level(input wire clk_100mhz,
     //data from fifo to transmit module
     blk_mem_gen_2 bmg_fifo_dout(.clka(clk_25mhz), .wea(1'b1), .addra(1'b0),
                       .dina(fifo_dout), .clkb(clk_6144mhz),
-                      .web(1'b0), .addrb(1'b0), .dinb(8'b0000_0000), .doutb(crossed_dout)); 
-   
-    //blk mem for ila                  
-    blk_mem_gen_1 bmg_debug(.clka(clk_6144mhz), .wea(1'b1), .addra(1'b1),
-                      .dina(dout), .clkb(clk_25mhz),
-                      .web(1'b0), .addrb(1'b1), .dinb(1'b0), .doutb(probe_sig)); 
-                      
-    logic probe_sig;
-                      
-                      
-    ila_0 ila(.clk(clk_25mhz), .probe0(song_title), .probe1(directory_data), .probe2(select_song));
-     
+                      .web(1'b0), .addrb(1'b0), .dinb(8'b0000_0000), .doutb(crossed_dout));      
 
     // frame assembly
     logic dout; //transmitted data
@@ -306,8 +278,6 @@ module top_level(input wire clk_100mhz,
             fifo_ready <= 1'b0;
             prev_frame_ready <= 0;
             sd_busy <= 1'b0;
-            current_addr <= song0_addr_start;
-            end_addr <= song0_addr_end; 
             waiting_for_data <= 1'b0;
             valid_directory <= 1'b0;
         end else begin

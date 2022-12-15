@@ -52,8 +52,6 @@ module filesystem(input wire clk, // 25 MHZ clock
             case(filesystemstate) 
                 DIRECTORY: 
                     begin 
-                    
-                    
                            if (valid_directory) begin  //This is when we get a valid cluster number back 
                                cluster_number <= {{{directory_data[07:00]},{directory_data[15:08]}}}; //First cluster number
                                filesystemstate <= DATA; 
@@ -73,7 +71,7 @@ module filesystem(input wire clk, // 25 MHZ clock
                 CLUSTER: //This is waiting for response of SD card for next cluster number and then sending out the next adress 
                 begin 
                     //Even or Odd look at last bit, odd then do second half. 
-                    if (done && (clustertiming == 0)  && (cluster_offset == 1 || cluster_offset == 2))  
+                    if (done && (clustertiming == 0)  && (cluster_offset == 1 || cluster_offset == 2))  //Logic that allows for two clusters between sectors to work 
                         begin 
                             SDaddress <= SDaddress + 512;
                             cluster_offset <= 3 - cluster_offset; 
@@ -88,23 +86,21 @@ module filesystem(input wire clk, // 25 MHZ clock
                         if (cluster_number[0] == 1) begin //Odd 
                         SDaddress <= (((((cluster_number - 1) * 3) >> 1) >>> 9 ) <<< 9 ) + FAToffset;  
                         target_byte <= ((((cluster_number - 1) * 3) >> 1)  - (((((cluster_number-1) * 3) >> 1) >>> 9 ) <<< 9 )) ; // Byte - starting adress 
-                       
-//                       
+                                              
                        if ((512 - ((((cluster_number - 1) * 3) >> 1)  - (((((cluster_number-1) * 3) >> 1) >>> 9 ) <<< 9 )) ) == 0) begin //edge case
                             cluster_offset <= 3;
-                            clustertiming <= 1; //New
+                            clustertiming <= 1; 
                        end else 
-                       //Remember these are last 1 or 2  least significant byte 
                         if (512 - ((((cluster_number - 1) * 3) >> 1)  - (((((cluster_number-1) * 3) >> 1) >>> 9 ) <<< 9 )) < 3 ) begin 
-                            cluster_offset <= (512 - ((((cluster_number - 1) * 3) >> 1)  - (((((cluster_number-1) * 3) >> 1) >>> 9 ) <<< 9 )) )  ; //sub1
+                            cluster_offset <= (512 - ((((cluster_number - 1) * 3) >> 1)  - (((((cluster_number-1) * 3) >> 1) >>> 9 ) <<< 9 )) )  ; 
                         end else begin 
-                            cluster_offset <= 3; //was 2 
-                            clustertiming <= 1; //New
+                            cluster_offset <= 3;  
+                            clustertiming <= 1; 
                         end  
 
                         end
                          else 
-                        if (cluster_number[0] == 0) begin
+                        if (cluster_number[0] == 0) begin //initial even cluster
                         SDaddress <= ((((cluster_number * 3) >> 1) >>> 9 ) <<< 9 ) + FAToffset; 
                         target_byte <= (((cluster_number * 3) >> 1)  - ((((cluster_number * 3) >> 1) >>> 9 ) <<< 9 )) ; // Byte - starting adress 
                         
@@ -116,11 +112,10 @@ module filesystem(input wire clk, // 25 MHZ clock
                             cluster_offset <= ( 512 -  (((cluster_number * 3) >> 1)  - ((((cluster_number * 3) >> 1) >>> 9 ) <<< 9 ))) ; //sub 1  
 
                         end else begin 
-                            cluster_offset <= 3; //2  
+                            cluster_offset <= 3;   
                             clustertiming <= 1;                        
                         end 
                         end  
-//Need to think about the offset numbers
                     end 
                     else if(done && (clustertiming == 1)  && valid_cluster) begin //Got the response back from SD card 
                         old_cluster_offset <= 0; 
@@ -132,8 +127,7 @@ module filesystem(input wire clk, // 25 MHZ clock
                         datasector_counter <= 1; 
                         selector <= 2; 
                         if (cluster_number[0] == 0) begin  
-                            cluster_number <= {cluster_data[11:8], cluster_data[23:16]};  
-                            //NEED TO ADD LOGIC TO END HERE COPY THE IF CLSUSTER NUMBER >= FF8
+                            cluster_number <= {cluster_data[11:8], cluster_data[23:16]}; //getting next cluster number   
                             SDaddress <= dataoffset + (({cluster_data[11:8], cluster_data[23:16]} - 2) * 16384); //32 * 512 because of 32 sectors in one cluster.
                     
                         end else

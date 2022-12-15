@@ -23,7 +23,10 @@ set_part $partNum
 #read_ip [ glob ./ip/*xci ]
 read_ip ./ip/fifo_generator_0/fifo_generator_0.xci
 read_ip ./ip/blk_mem_gen_0/blk_mem_gen_0.xci
+read_ip ./ip/blk_mem_gen_vga/blk_mem_gen_vga.xci
+read_ip ./ip/blk_mem_gen_filesystem/blk_mem_gen_filesystem.xci
 read_ip ./ip/blk_mem_gen_2/blk_mem_gen_2.xci
+
 generate_target all [get_ips]
 synth_ip [get_ips]
 
