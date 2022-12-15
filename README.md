@@ -22,4 +22,3 @@ We hit all of our commitment goals (transmit data across TOSLINK between FPGAs (
 ### Implementation Insights (RETROSPECTIVE extension)
 * We should have increased the amount of FAT12 partitions, in order to increase the amount of audio stored.
 * Adding padding to the left in the 20-bit audio would decrease the volume of the audio while adding padding to the right would increase the volume.
-*  
