@@ -7,7 +7,8 @@ module top_level(input wire clk_100mhz,
 
                  output logic [7:0] ja,
                  output logic ca, cb, cc, cd, ce, cf, cg,
-                 output logic [7:0] an
+                 output logic [7:0] an,
+                 output logic [15:0] led
     );
     
     logic rst;            
@@ -49,8 +50,11 @@ module top_level(input wire clk_100mhz,
                                     .dout(dismantle_dout), .vout(dismantle_vout), .dauxout(dauxout), .vauxout(vauxout), .channeldout(channeldout),
                                     .channelvout(channelvout), .done(done), .kill(kill));
 
-    logic bs;
-    assign bs = dismantle_dout + 16'b1; 
+
+    // // FIFO FROM THE DISMANTLER
+    // fifo_generator_0 fif0(.full(full), .din(dismantle_dout[14:7]), .wr_en(wr_en), 
+    //                      .empty(empty), .dout(fifo_dout), .rd_en(rd_en), 
+    //                      .clk(clk_60mhz), .srst(rst), .prog_empty(empty_512));
 
     // FIFO FROM THE DECODING
     logic crossed_frame_ready;  
@@ -63,7 +67,7 @@ module top_level(input wire clk_100mhz,
     logic empty_512;
     assign wr_en = !full & dismantle_vout;
     assign rd_en = crossed_frame_ready & !empty;
-    fifo_generator_0 fif0(.full(full), .din(dismantle_dout[14:7]), .wr_en(wr_en), 
+    fifo_generator_0 fif1(.full(full), .din(dismantle_dout[14:7]), .wr_en(wr_en), 
                          .empty(empty), .dout(fifo_dout), .rd_en(rd_en), 
                          .clk(clk_60mhz), .srst(rst), .prog_empty(empty_512));
 
@@ -94,9 +98,8 @@ module top_level(input wire clk_100mhz,
     //             .frame_ready(1'b1), .dout(dout), .count(count));
     assign ja = {dout, dout, dout, dout, dout, dout, dout, dout};
     
-//    ila_receiving my_ila(.clk(clk_60mhz), .probe0(jcinput), .probe1(rec_dout), .probe2(rec_vout), .probe3(bmc_dout), 
-//            .probe4(bmc_vout), .probe5(bmc_frame_counter), .probe6(in_channel));
-
+    // ila_receiving my_ila(.clk(clk_60mhz), .probe0(jcinput), .probe1(rec_dout), .probe2(rec_vout), .probe3(bmc_dout), 
+    //        .probe4(bmc_vout), .probe5(bmc_frame_counter), .probe6(in_channel));
     // ila0 my_ila89(.clk(clk_60mhz), .probe0(jcinput), .probe1(dout), .probe2(dismantle_dout));
             
     // SEVEN-SEGMENT DISPLAY FOR CRC AND DEBUGGING
@@ -106,6 +109,9 @@ module top_level(input wire clk_100mhz,
                                 .cat_out({cg, cf, ce, cd, cc, cb, ca}),
                                 .an_out(an));
 
+    assign led[15] = kill;
+    assign led[14] = done;
+
     // FUNCTIONING OF THE SEVEN-SEGMENT DISPLAY
     logic [31:0] val_in;
     logic lock;
@@ -114,17 +120,12 @@ module top_level(input wire clk_100mhz,
             val_in <= 32'b0;
             lock <= 0;
         end else begin
-            if (dismantle_vout) begin
-                val_in <= {12'b0, dismantle_dout};
-            end else begin
-                val_in <= 32'b0;
+            if (done && !lock && !kill) begin
+                val_in <= channeldout;
+                lock <= 1;
+            end else if (!lock) begin
+                val_in <= 32'b00000000_00000000_00000000_00101011;
             end
-            // if (done && !lock) begin
-            //     val_in <= channeldout;
-            //     lock <= 1;
-            // end else begin
-            //     val_in <= 32'hABCDE123;
-            // end
         end
     end
 endmodule

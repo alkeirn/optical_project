@@ -137,7 +137,7 @@ module frame_dismantle (input wire clk,
                         subframestate <= PARITY;
                         if (frame_counter <= 191 && !in_channel) begin
                             channel_buffer <= {channel_buffer[190:0], din};
-                            if (channel_counter == 7) begin
+                            if (channel_counter == 7 && frame_counter <= 183) begin
                                 channel_counter <= 0;
                                 axiid_crc <= {channel_buffer[6:0], din};
                                 axiiv_crc <= 1;

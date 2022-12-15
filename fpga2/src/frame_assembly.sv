@@ -11,26 +11,23 @@ module frame_assembly(input wire clk, // 6.144 MHZ clock
                    output logic frame_ready, // at the start of every frame (preamble) signal to say ready to get 20 bits from FIFO 
                    output logic [10:0] count
     );
-    // NEED THIS: 28-bit SHIFT buffer ********************************************************************************* 
-
     logic previousbit; // this is for biphase and preamble 
     logic [7:0] frame_counter; // this variable counts the number of frames sent
     // The following counters keep track of the functioning of every subframe section
     logic [2:0] preamble_counter; // this variable counts the number of preamble bits sent. Counts up to 8  
     logic [2:0] aux_counter; // this variable counts the number of aux bits sent. Counts up to 8 because 4 logical bits * 2   
     logic[5:0] data_counter; // this variable counts the number of data bits sent. Counts up to 40 because 20 logical bits * 2   
-    logic [1:0] valid_counter; 
+    logic [1:0] valid_counter; // ths
     logic [1:0] user_counter;
     logic [1:0] channel_counter; 
     logic [1:0] parity_counter; 
 
     logic evenparitytracker; 
-    logic EVENPARITYCOUNTER;  //TODO LATER TESTER TO SEE IF ITS 20? HOWEVER MANY PREAMBLE TO THE END BITS WIDE.  
     logic [1:0] channel_state; // This state variable defines the current channel from which information is being sent
     localparam CHANNEL_A = 2'b00;
     localparam CHANNEL_B = 2'b01;
-//    logic [191:0] channel = 192'hA129BB293000021399BFF930EEBA99222019823749CDD100;
-    logic [191:0] channel = 192'b00000000_00010000_00000000_00000000_0100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000;
+    // This is the channel data scoped from the DVD player:
+    logic [191:0] channel = 192'b00000000_00010000_00000000_00000000_01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000_00000000_00000000_00000000_00101011;
 
     // this state variable defines the current stage of the subframe
     typedef enum {PREAMBLE, AUX, DATA, VALID, USER, CHANNEL, PARITY} subframe_state;  
@@ -167,7 +164,7 @@ module frame_assembly(input wire clk, // 6.144 MHZ clock
                     DATA: 
                     begin
                         aux_counter <= 0;  
-                        data_counter <= data_counter + 1; // now counts to 40
+                        data_counter <= data_counter + 1; // counts to 40
                         // Current 0 
                         if (data_counter < 41) begin 
                             dout <= biphaseout;
@@ -177,11 +174,10 @@ module frame_assembly(input wire clk, // 6.144 MHZ clock
                                 subframestate <= VALID; 
                                 logicalin <= 0; // this is the beginning of the biphase mark for VALID      
                                 evenparitytracker <= evenparitytracker ^ 0; 
-                            // DOUBLE CHECK THIS WHEN AWAKE ERIC AND LOUIS FOR THE EVEN PARITY 
                             end else  begin 
                                 if (~newdatain) begin 
                                     evenparitytracker <= evenparitytracker ^ din[19 - (data_counter >> 1)];
-                                    logicalin <= din[19 - (data_counter >> 1)]; // MIGHT NOT WORK 
+                                    logicalin <= din[19 - (data_counter >> 1)];
                                 end 
                             end 
                         end
@@ -237,7 +233,6 @@ module frame_assembly(input wire clk, // 6.144 MHZ clock
                         parity_counter <= parity_counter + 1; 
                         evenparitytracker <= 0; 
                         if (parity_counter == 2) begin 
-                            // newdatain <= 0; // FINAL TESTCASE see if at this moment it will be 0 
                             subframestate <= PREAMBLE; 
                             if (channel_state == CHANNEL_A) begin 
                                 channel_state <= CHANNEL_B;
@@ -262,8 +257,3 @@ module frame_assembly(input wire clk, // 6.144 MHZ clock
 endmodule
 
 `default_nettype wire
-
-// todo NEED PREVIOUS BIT BEING SET FOR EVERYTHING AFTER PREAMBLE AND NEED DOUT TO GO TO BIPHASE OUT. 
-// FOR PARITY WE NEED IT TO SEND OUT ONE BIT OF THE NEXT PREAMBLE 
-// ALSO FOR PARITY STATE MACHINE WE NEED TO WE NEED THE LOGIC TO DECIDED WHICH OF THE PREAMBLE STATE WE CHOOSE IMMEDIATELY AS WELL. 
-// wE ALSO NEED to have the channel 192 bits for channel // Eric will do this. 

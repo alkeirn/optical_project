@@ -16,6 +16,7 @@ module sd_state_machine(input wire clk_25mhz,
                     output logic sd_reset, 
                     output logic sd_sck, // Sd card has its own clock
                     output logic sd_cmd, //Ignore not used
+                    output logic [19:0] byte_count,
                     output logic seen_flag
                     
     );
@@ -42,7 +43,6 @@ module sd_state_machine(input wire clk_25mhz,
      logic [4:0] status;         // Used for debugging
 
     // control variables
-    logic [19:0] byte_count; //What byte are we reading from
     logic prev_byte_available; //track rising edge of byte available
     typedef enum {INIT, WAIT, PLAYING} states; //State machine for reading
     states state = WAIT;
@@ -59,20 +59,21 @@ module sd_state_machine(input wire clk_25mhz,
 
         if(rst) begin
             rd <= 1'b0;
-            data_out <= 8'b11111111; //Set this default so it's obvious it hasn't read
+            data_out <= 8'b10101010; //Set this default so it's obvious it hasn't read
             state <= INIT;
             byte_count <= 0;
             data_valid <= 1'b0;
-            done <= 1'b0;
+            done <= 1'b1;
             seen_flag <= 1'b0;
         end else begin
             case(state)
                 INIT: begin //Wait for button press to read audio
                     rd <= 1'b0;
                     data_valid <= 1'b0;
-                    done <= 1'b0;
+                    done <= 1'b1;
                     if (read_signal) begin
                         state <= WAIT;
+                        done <= 1'b0;
                     end
                 end
                 WAIT: begin

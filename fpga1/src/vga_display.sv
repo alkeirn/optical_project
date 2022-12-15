@@ -12,7 +12,7 @@ module vga_display (
     input  wire btnc,    // reset button (active low)
     input  wire btnd,    // down button
     input  wire btnu,    // up button
-    input  wire [79:0] titles [2:0],
+    input  wire [79:0] titles,
     output      logic vga_hs,    // horizontal sync
     output      logic vga_vs,    // vertical sync
     output      logic [3:0] vga_r,  // 4-bit VGA red
@@ -100,59 +100,20 @@ module vga_display (
     // subtract 0x20 from code points as font starts at U+0020
     logic [$clog2(F_ROM_DEPTH)-1:0] spr_cp_norm [SPR_CNT];
     always_comb begin
-        case(idx)
-            0: begin 
-                spr_cp_norm[13] = 'h00;  // E U+0045
-                spr_cp_norm[12] = 'h00;  // L U+004C
-                spr_cp_norm[11] = titles[0][7:0] - 'h20;  // H U+0048
-                spr_cp_norm[10] = titles[0][15:8] - 'h20;  // H U+0048
-                spr_cp_norm[9] = titles[0][23:16] - 'h20;  // E U+0045
-                spr_cp_norm[8] = titles[0][31:24] - 'h20;  // L U+004C
-                spr_cp_norm[7] = titles[0][39:32] - 'h20;  // L U+004C
-                spr_cp_norm[6] = titles[0][47:40] - 'h20;  // O U+004F
-                spr_cp_norm[5] = titles[0][55:48] - 'h20;  // H U+0048
-                spr_cp_norm[4] = titles[0][63:56] - 'h20;  // H U+0048
-                spr_cp_norm[3] = titles[0][71:64] - 'h20;  // H U+0048
-                spr_cp_norm[2] = titles[0][79:72] - 'h20;  // H U+0048
-                spr_cp_norm[1] = 'h00;  // L U+004C
-                spr_cp_norm[0] = 'h00;  // O U+004F
-
-            end
-            1: begin 
-                spr_cp_norm[13] = 'h00;  // E U+0045
-                spr_cp_norm[12] = 'h00;  // L U+004C
-                spr_cp_norm[11] = titles[1][7:0] - 'h20;  // H U+0048
-                spr_cp_norm[10] = titles[1][15:8] - 'h20;  // H U+0048
-                spr_cp_norm[9] = titles[1][23:16] - 'h20;  // E U+0045
-                spr_cp_norm[8] = titles[1][31:24] - 'h20;  // L U+004C
-                spr_cp_norm[7] = titles[1][39:32] - 'h20;  // L U+004C
-                spr_cp_norm[6] = titles[1][47:40] - 'h20;  // O U+004F
-                spr_cp_norm[5] = titles[1][55:48] - 'h20;  // H U+0048
-                spr_cp_norm[4] = titles[1][63:56] - 'h20;  // H U+0048
-                spr_cp_norm[3] = titles[1][71:64] - 'h20;  // H U+0048
-                spr_cp_norm[2] = titles[1][79:72] - 'h20;  // H U+0048
-                spr_cp_norm[1] = 'h00;  // L U+004C
-                spr_cp_norm[0] = 'h00;  // O U+004F
-            end
-            2: begin 
-                spr_cp_norm[13] = 'h00;  // E U+0045
-                spr_cp_norm[12] = 'h00;  // L U+004C
-                spr_cp_norm[11] = titles[2][7:0] - 'h20;  // H U+0048
-                spr_cp_norm[10] = titles[2][15:8] - 'h20;  // H U+0048
-                spr_cp_norm[9] = titles[2][23:16] - 'h20;  // E U+0045
-                spr_cp_norm[8] = titles[2][31:24] - 'h20;  // L U+004C
-                spr_cp_norm[7] = titles[2][39:32] - 'h20;  // L U+004C
-                spr_cp_norm[6] = titles[2][47:40] - 'h20;  // O U+004F
-                spr_cp_norm[5] = titles[2][55:48] - 'h20;  // H U+0048
-                spr_cp_norm[4] = titles[2][63:56] - 'h20;  // H U+0048
-                spr_cp_norm[3] = titles[2][71:64] - 'h20;  // H U+0048
-                spr_cp_norm[2] = titles[2][79:72] - 'h20;  // H U+0048
-                spr_cp_norm[1] = 'h00;  // L U+004C
-                spr_cp_norm[0] = 'h00;  // O U+004F
-            end
-            default: begin 
-            end
-        endcase
+        spr_cp_norm[13] = 'h00; 
+        spr_cp_norm[12] = 'h00; 
+        spr_cp_norm[11] = titles[7:0] - 'h20; 
+        spr_cp_norm[10] = titles[15:8] - 'h20; 
+        spr_cp_norm[9] = titles[23:16] - 'h20;  
+        spr_cp_norm[8] = titles[31:24] - 'h20;
+        spr_cp_norm[7] = titles[39:32] - 'h20;  
+        spr_cp_norm[6] = titles[47:40] - 'h20;  
+        spr_cp_norm[5] = titles[55:48] - 'h20;  
+        spr_cp_norm[4] = titles[63:56] - 'h20;  
+        spr_cp_norm[3] = titles[71:64] - 'h20;  
+        spr_cp_norm[2] = titles[79:72] - 'h20;  
+        spr_cp_norm[1] = 'h00; 
+        spr_cp_norm[0] = 'h00; 
     end
 
     // subtract 0x20 from code points as font starts at U+0020
@@ -290,35 +251,6 @@ module vga_display (
     logic btnd_prev;
     logic btnu_prev;
     always_ff @(posedge clk_pix) begin
-        if (rst_pix) begin
-            idx <= 0;
-            btnd_prev <= 0;
-            btnu_prev <= 0;
-        end else begin
-            if (btnd && !btnd_prev) begin
-                btnd_prev <= 1;
-                case(idx)
-                    0: idx <= 2;
-                    1: idx <= 0;
-                    2: idx <= 1;
-                    default: begin 
-                    end
-                endcase
-            end else if (!btnd && btnd_prev) begin
-                btnd_prev <= 0;
-            end else if (btnu && !btnu_prev) begin
-                btnu_prev <= 1;
-                case(idx)
-                    0: idx <= 1;
-                    1: idx <= 2;
-                    2: idx <= 0;
-                    default: begin 
-                    end
-                endcase
-            end else if (!btnu && btnu_prev) begin
-                btnu_prev <= 0;
-            end
-        end
         vga_hs <= hsync;
         vga_vs <= vsync;
         vga_r <= de ? (spr_pix != 0) ? red_spr   : starlight : 4'h0;

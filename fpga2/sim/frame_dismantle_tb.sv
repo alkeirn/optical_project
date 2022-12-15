@@ -17,7 +17,7 @@ module frame_dismantle_tb;
     logic vout;
     logic [3:0] dauxout;
     logic vauxout;
-    logic [191:0] channeldout;
+    logic [31:0] channeldout;
     logic channelvout;
     logic done;
     logic kill;
