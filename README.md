@@ -3,7 +3,7 @@
 Jay and Fischer: Since we were down the the wire on the final report, we thought we'd include more evaluation information here.
 
 ### EVALUATION
-FPGA1: We used 37% of the block ram for this design. This is not surprising--accounting for all of the different signals and variables took a bit of space. We anticipated this in the beginning, which is why we used the SD card. The FIFO takes up the most space, with storage for 12288 bits. 
+*FPGA1:* We used 37% of the block ram for this design. This is not surprising--accounting for all of the different signals and variables took a bit of space. We anticipated this in the beginning, which is why we used the SD card. The FIFO takes up the most space, with storage for 12288 bits. 
 
 For timing, we specifically laid out the modules so that we could mostly ignore strict timing requirements. The SD card reads at 25Mhz, so we created a fifo buffer to store data and transmit at 6mhz as needed. This way we weren't calculating delay; we didn't start transmitting until the filesystem and SD card were done collecting data. We didn't calculate latency for this reason. If we were to calculate it, we could scope it on the ILA to get an idea of how long it takes for each module to process. But it didn't have much of an impact on out project. 
 
